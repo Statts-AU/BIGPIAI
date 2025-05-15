@@ -1,0 +1,160 @@
+<section id="section-05d73917-a117-4060-a034-a12ca1708aae">
+  <div id="root">
+    <section id="header" class="bg-white shadow-md fixed w-full top-0 z-50">
+      <nav class="container mx-auto px-4">
+        <div class="flex justify-between items-center py-4">
+          <!-- Logo -->
+          <div class="flex items-center">
+            <a href="#hero">
+              <img src="/static/images/logo.jpg" alt="Logo" class="h-8" />
+            </a>
+            <!-- <a href="#hero" class="text-2xl font-bold text-blue-600"
+                    >BigpicAI</a
+                  > -->
+          </div>
+
+          <!-- Desktop Menu -->
+          <div class="hidden md:flex space-x-6">
+            <a
+              href="#hero"
+              class="font-medium text-gray-700 hover:text-blue-600 transition-colors duration-300"
+              >Home</a
+            >
+            <a
+              href="#features"
+              class="font-medium text-gray-700 hover:text-blue-600 transition-colors duration-300"
+              >Features</a
+            >
+            <a
+              href="#phase1-start"
+              class="font-medium text-gray-700 hover:text-blue-600 transition-colors duration-300"
+              >Create Writing Plan</a
+            >
+            <a
+              href="#phase2-start"
+              class="font-medium text-gray-700 hover:text-blue-600 transition-colors duration-300"
+              >Generate Template</a
+            >
+
+            <a
+              href="#contact"
+              class="font-medium text-gray-700 hover:text-blue-600 transition-colors duration-300"
+              >Contact</a
+            >
+          </div>
+
+          <div class="hidden md:block">
+            {% if request.cookies.get('access_token_cookie') %}
+            <a
+              href="/logout"
+              class="bg-red-600 text-white px-6 py-2 rounded-md font-medium hover:bg-red-700 transition-colors duration-300"
+              >Logout</a
+            >
+            {% else %}
+            <a
+              href="/login"
+              class="bg-blue-600 text-white px-6 py-2 rounded-md font-medium hover:bg-blue-700 transition-colors duration-300"
+              >Login</a
+            >
+            {% endif %}
+          </div>
+
+          <!-- Mobile menu button -->
+          <div class="md:hidden">
+            <button
+              id="mobile-menu-button"
+              aria-label="Toggle menu"
+              class="text-gray-700 focus:outline-none"
+            >
+              <svg
+                class="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M4 6h16M4 12h16M4 18h16"
+                ></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Mobile Menu -->
+        <div
+          id="mobile-menu"
+          class="md:hidden hidden pb-4 animate__animated animate__fadeIn"
+        >
+          <div class="flex flex-col space-y-3">
+            <a
+              href="#hero"
+              class="font-medium text-gray-700 hover:text-blue-600 transition-colors duration-300"
+              >Home</a
+            >
+            <a
+              href="#features"
+              class="font-medium text-gray-700 hover:text-blue-600 transition-colors duration-300"
+              >Features</a
+            >
+            <a
+              href="#phase1-start"
+              class="font-medium text-gray-700 hover:text-blue-600 transition-colors duration-300"
+              >Phase 1</a
+            >
+            <a
+              href="#phase2-start"
+              class="font-medium text-gray-700 hover:text-blue-600 transition-colors duration-300"
+              >Phase 2</a
+            >
+            {% if request.cookies.get('access_token_cookie') %}
+            <a
+              href="/logout"
+              class="bg-red-600 text-white px-4 py-2 rounded-md font-medium hover:bg-red-700 transition-colors duration-300 inline-block w-24 text-center mt-2"
+              >Logout</a
+            >
+            {% else %}
+            <a
+              href="/login"
+              class="bg-blue-600 text-white px-4 py-2 rounded-md font-medium hover:bg-blue-700 transition-colors duration-300 inline-block w-24 text-center mt-2"
+              >Login</a
+            >
+            {% endif %}
+          </div>
+        </div>
+      </nav>
+    </section>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const mobileMenuButton = document.getElementById("mobile-menu-button");
+        const mobileMenu = document.getElementById("mobile-menu");
+
+        mobileMenuButton.addEventListener("click", function () {
+          mobileMenu.classList.toggle("hidden");
+        });
+
+        // Close mobile menu when clicking on a link
+        const mobileLinks = mobileMenu.querySelectorAll("a");
+        mobileLinks.forEach((link) => {
+          link.addEventListener("click", () => {
+            mobileMenu.classList.add("hidden");
+          });
+        });
+
+        // Add shadow to navbar on scroll
+        window.addEventListener("scroll", function () {
+          const header = document.getElementById("header");
+          if (window.scrollY > 10) {
+            header.classList.add("shadow-lg");
+          } else {
+            header.classList.remove("shadow-lg");
+          }
+        });
+      });
+    </script>
+  </div>
+</section>
