@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html style="margin: 0; padding: 0; height: 100%">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+    />
+    <style>
+      html,
+      body {
+        margin: 0 !important;
+        padding: 0 !important;
+        height: 100% !important;
+        width: 100% !important;
+        overflow-x: hidden;
+      }
+      body {
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+        background: white;
+      }
+      #root {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+      }
+      * {
+        box-sizing: border-box;
+      }
+    </style>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    
+    <!-- <link rel="stylesheet" href="/static/custom.css" /> -->
+  </head>
+  <body>
+    <style>
+      .bg-blue-900 {
+        background-color: #133c54 !important;
+      }
+      .bg-blue-800 {
+        background-color: #184b69 !important;
+      }
+      .bg-blue-700 {
+        background-color: #1c5577 !important;
+      }
+      .bg-blue-600 {
+        background-color: #21658c !important;
+      }
+      .bg-blue-500 {
+        background-color: #2574a1 !important;
+      }
+      .bg-blue-400 {
+        background-color: #2a83b6 !important;
+      }
+      .bg-blue-300 {
+        background-color: #3197d2 !important;
+      }
+      .bg-blue-200 {
+        background-color: #39b0f5 !important;
+      }
+      .bg-blue-100 {
+        background-color: #42caff !important;
+      }
+      .bg-blue-50 {
+        background-color: #e6f2f7 !important;
+      }
+
+      .text-blue-900 {
+        color: #133c54 !important;
+      }
+      .text-blue-800 {
+        color: #184b69 !important;
+      }
+      .text-blue-700 {
+        color: #1c5577 !important;
+      }
+      .text-blue-600 {
+        color: #21658c !important;
+      }
+      .text-blue-500 {
+        color: #2574a1 !important;
+      }
+
+      .text-blue-400 {
+        color: #5391b0 !important;
+      }
+      .text-blue-300 {
+        color: #3197d2 !important;
+      }
+      .text-blue-200 {
+        color: #39b0f5 !important;
+      }
+      .text-blue-100 {
+        color: #42caff !important;
+      }
+    </style>
+    {% block content %}
+    <p>Default content</p>
+    {% endblock %}
+  </body>
+</html>
