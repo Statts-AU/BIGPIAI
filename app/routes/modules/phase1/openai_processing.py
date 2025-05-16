@@ -15,12 +15,80 @@ import re
 import tempfile
 
 
+from .models import SectionEntries
+
 # Load environment variables from .env file
 load_dotenv()
 
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
 client = openai.OpenAI()
+
+
+def extract_content_with_openai2(docx_file):
+    doc = Document(docx_file)
+    full_text = "\n".join([para.text.strip()
+                          for para in doc.paragraphs if para.text.strip()])
+    # full_text = read_docx_with_mammoth(docx_file)
+
+    print("🧠 Processing document with OpenAI...")
+    prompt_path = os.path.join(os.path.dirname(
+        __file__), "./prompt.txt")
+
+    with open(prompt_path, "r", encoding="utf-8") as f:
+        instructions = f.read()
+
+    try:
+        response = client.responses.parse(
+            model="gpt-4o-mini",
+            instructions=instructions,
+            input=[
+                {"role": "user", "content": full_text},
+            ],
+            text_format=SectionEntries,
+        )
+
+        response_content = response.output_parsed.Sections
+
+        print(response_content)
+
+        # Truncate for display
+        final_output = [
+            {
+                "header": section.Header,
+                "subheader": subsection.Subheader,
+                "requirements": subsection.Requirements,
+                "page_limit": subsection.PageLimit
+            }
+            for section in response_content
+            for subsection in section.Subheaders
+        ]
+
+        print_sections_as_table(final_output)
+        return final_output
+
+    except Exception as e:
+        print("❌ Error in extract_content_with_openai2:", str(e))
+        return []
+
+
+def print_sections_as_table(sections):
+    """
+    Print the extracted sections as a formatted table for understanding.
+    """
+    for item in sections:
+        header = item.get("header", "")
+        subheader = item.get("subheader", "")
+        requirements = "\n".join(item.get("requirements", []))
+        page_limit = item.get("page_limit", "0")
+
+        # Print the section in a formatted way
+        print(f"Header: \n  {header}")
+        print(f"Subheader: \n{subheader}")
+        print(f"Requirements:\n{requirements}")
+        print(f"Page Limit: \n{page_limit}")
+        print("-" * 40)
+        print("\n")
 
 # Function: Read full document text
 
@@ -33,20 +101,46 @@ def extract_content_with_openai(docx_file):
     print("🧠 Processing document with OpenAI...")
 
     prompt = f"""
-You are given the full text of a Word document. Act as a senior bidding tender document analyst and your task is to extract the structure into a JSON array where each item contains:
+You are a **Senior Bidding Tender Document Analyst**.
 
-- header (main section heading), Please keep the numbering etc shown in the document.
-- subheader (if applicable), please keep the numbering etc shown in the document.
-- requirements (list of extracted requirements under the section or subheader), it should not be rephrase or reworded, it should just be the same from the document to avoid confusions. Also keep the numbering etc same.
-- page_limit (if mentioned in the text, otherwise 0)
+Your task is to analyse the full text of a Word document and return a **single, valid JSON array** in the format shown below.
+For each element capture:
 
-Return only **valid JSON** in this format:
+- **header** – the main section heading. Keep any numbering, colons, dashes, etc.
+- **subheader** – the sub-section heading if present; otherwise `null`.
+- **requirements** – an ordered list of all requirement lines that belong to that header / subheader.
+  Preserve the text exactly as it appears (including numbering such as "a)", "(i)", "1)", etc.).
+  *Do not* place lines that match the subheader pattern here.
+- **page_limit** – the numeric page limit if the line explicitly mentions it (e.g. "Page limit: …"); otherwise `"0"`.
+
+### Hierarchy rules you must follow
+
+1. **Header detection**
+   • A line that begins with wording such as "Returnable Schedule …", "Schedule …", "Appendix …", or other clearly top-level context.
+   • If multiple top-level headers exist, treat each as a separate JSON object.
+
+2. **Subheader detection**
+   • Any line that starts with a decimal outline pattern at the very start of the line, e.g. `1.1`, `2.3`, `10.4.2`, followed by whitespace and the title.
+     Regex hint: `^\\s*\\d+\\.\\d+(?:\\.\\d+)*\\s+`.
+   • Keep the numbering *and* the title together as the subheader value.
+   • **Do not** place these lines in the requirements list.
+
+3. **Requirement lines**
+   • Everything that belongs under the last recognised header / subheader and **does not** match the header or subheader patterns.
+   • Preserve original numbering, indentation symbols, punctuation, and capitalisation.
+
+4. **Page limits**
+   • Detect phrases like "Page limit: Maximum total of five (5) A4 pages …".
+   • Extract only the numeric limit; if multiple limits appear for the same section, take the highest number.
+   • If no limit is stated, use `"0"`.
+
+### Output format (return **only** JSON)
 
 [
   {{
     "header": "Header Title",
     "subheader": "Subsection Title or null",
-   "requirements": [
+    "requirements": [
       "1) Requirement one",
       "2) Requirement two",
       "(a) Sub requirement",
@@ -54,10 +148,6 @@ Return only **valid JSON** in this format:
     ],
     "page_limit": "2"
   }},
-  ...
-]
-
-[
   {{
     "header": "Appendix A – Tender Submission Requirements",
     "subheader": "Annexure 1",
@@ -72,13 +162,11 @@ Return only **valid JSON** in this format:
 ]
 
 RULES:
-- Preserve exact numbering and lettering (like "1)", "(a)", etc.)
-- Keep the original punctuation and structure from the document
-- Only respond with a **valid JSON array**
-- Do NOT include any commentary, markdown, or natural language outside the JSON
+- Preserve exact numbering and lettering (like "1)", "(a)", etc.).
+- Keep the original punctuation and structure from the document.
+- Respond with a **valid JSON array only** – no commentary, markdown, or extra text.
 
-Here is the document content:
-
+### Document content starts below:
 {full_text}
 """
 
@@ -103,6 +191,7 @@ Here is the document content:
     except Exception as e:
         print("❌ Error parsing GPT response:", str(e))
         return []
+
 
 
 # Function: Excel formatting
@@ -383,3 +472,22 @@ def add_excel_with_tables(tables, excel_file):
 
     # wb.save(output_path)
     # print(f"✅ Excel file saved to: {output_path}")
+
+
+if __name__ == "__main__":
+
+    # Example usage
+    docx_file = "example.docx"  # Replace with your .docx file path
+
+
+    sections = extract_content_with_openai2(docx_file)
+    print_sections_as_table(sections)
+    # # Add sections to the Excel file
+    # add_excel_with_sections(sections, excel_file)
+
+    # Extract tables from the Word document
+    # tables = extract_tables_from_docx_usingpydocx(docx_file)
+    # print("Extracted tables:", tables)
+
+    # # Add tables to the Excel file
+    # add_excel_with_tables(tables, excel_file)

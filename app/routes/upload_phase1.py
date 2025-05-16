@@ -2,7 +2,7 @@ from flask import request, jsonify, send_file, redirect, url_for
 import io
 import zipfile
 
-from .modules.phase1.openai_processing import extract_content_with_openai, add_excel_with_sections, add_excel_with_tables, extract_tables_with_headings_and_context
+from .modules.phase1.openai_processing import extract_content_with_openai2, add_excel_with_sections, add_excel_with_tables, extract_tables_with_headings_and_context
 from flask_jwt_extended import verify_jwt_in_request
 import os
 import tempfile
@@ -51,7 +51,7 @@ def upload_phase1():
                     tmp.write(excel_file.read())
                     excel_path = tmp.name
 
-                sections = extract_content_with_openai(word_file)
+                sections = extract_content_with_openai2(word_file)
                 print('extracted section/contents')
         
 
