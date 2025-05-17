@@ -27,6 +27,6 @@ jobs:
         with:
           context: .
           push: true
-          tags: jerinthomascarmel/fileprocessor
+          tags: bigpicai/BigpicAI
           cache-from: type=gha
           cache-to: type=gha,mode=max
