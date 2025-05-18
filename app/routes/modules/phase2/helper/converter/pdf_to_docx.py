@@ -5,8 +5,7 @@ import os
 # from pdf2docx import Converter
 from dotenv import load_dotenv
 import os
-load_dotenv
-
+load_dotenv(override=True)
 apiKey = os.getenv("PDF_REST_API_KEY")
 
 
@@ -49,43 +48,41 @@ def convert_pdf_to_docx_pdfrest(pdf_file):
     }
 
     print("Sending POST request to word endpoint...")
+    try:
+        response = requests.post(
+            word_endpoint_url, data=mp_encoder_word, headers=headers)
 
-    response = requests.post(
-        word_endpoint_url, data=mp_encoder_word, headers=headers)
+        print("Response status code: " + str(response.status_code))
 
-    print("Response status code: " + str(response.status_code))
+        if response.ok:
+            response_json = response.json()
+            print(json.dumps(response_json, indent=2))
 
-    if response.ok:
-        response_json = response.json()
-        print(json.dumps(response_json, indent=2))
+            # Extract the output URL from the response
+            output_url = response_json.get("outputUrl")
 
-        # Extract the output URL from the response
-        output_url = response_json.get("outputUrl")
-
-        if output_url:
-            return output_url
+            if output_url:
+                return output_url
+            else:
+                raise Exception(
+                    "Error: Output URL not found in the response."
+                )
         else:
-            return None
+            print("Response content: " + response.text)
+            raise Exception(
+                f"Error: {response.status_code} - {response.text}"
+            )
 
-        # if output_url:
-        #     # Download the file from the output URL
-        #     output_file = "converted_document.docx"
-        #     download_response = requests.get(output_url)
-        #     if download_response.ok:
-        #         with open(output_file, "wb") as f:
-        #             f.write(download_response.content)
-        #         print(f"File downloaded successfully: {output_file}")
-            # else:
-            #     print(f"Failed to download the file. Status code: {download_response.status_code}")
-    #     else:
-    #         print("Output URL not found in the response.")
-
-    # else:
-    #     print(response.json())
+    except Exception as e:
+        raise Exception(
+            f"Error: {response.status_code} - {response.text}"
+        )
+    finally:
+        file.close()
 
 
 def main():
-    pdf_path = os.path.abspath("../../input_files/document.pdf")
+    pdf_path = os.path.abspath("example.pdf")
     print(f"Processing file: {pdf_path}")
 
     if convert_pdf_to_docx_pdfrest(pdf_path):

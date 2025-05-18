@@ -10,7 +10,7 @@ import os
 
 
 def upload_phase2():
-    # First verify the user is authenticated
+    # First verify the user isauthenticated
     try:
         verify_jwt_in_request()
     except:
@@ -25,7 +25,6 @@ def upload_phase2():
         return jsonify({'error': 'Missing zip file!'}), 400
 
     try:
-
         # Create an in-memory buffer to hold the zip file contents
         zip_buffer = io.BytesIO(zip_file.read())
 
@@ -65,6 +64,7 @@ def upload_phase2():
             print('converting the pdf to docx back !')
             # conversion of pdf to docx
             from .modules.phase2.helper.converter.pdf_to_docx import convert_pdf_to_docx_pdfrest
+
             docx_urls = [
                 {"filename": os.path.basename(
                     pdf_path), "docxurl": convert_pdf_to_docx_pdfrest(pdf_path)}
@@ -75,10 +75,16 @@ def upload_phase2():
             # Remove the input folder and its contents
             remove_files_in_folder(input_folder)
 
-            # docx_urls =  [{'filename': 'Annexure 1 - Tender Acknowledgement and Execution.pdf', 'docxurl': 'https://api.pdfrest.com/resource/223d3b5a4-79eb-4735-8a43-ce114482aea2?format=file'}, {'filename': 'Annexure 2 - Volume 1 Tenderer Details.pdf', 'docxurl': 'https://api.pdfrest.com/resource/204866a2b-1876-4f0b-95b3-42f7658814a6?format=file'}, {'filename': 'Volume 2 Delivery Capability and Experience.pdf', 'docxurl': 'https://api.pdfrest.com/resource/2ceed7cb5-da4f-4796-b11c-0f0ce8a97568?format=file'}, {'filename': 'Volume 3 Workplace Health Safety and Environment WHSE.pdf', 'docxurl': 'https://api.pdfrest.com/resource/23ac90013-7793-4a27-9de8-f7e791f186d7?format=file'}, {'filename': 'Volume 4 Delivery Strategy.pdf', 'docxurl': 'https://api.pdfrest.com/resource/22cfc5d4f-0198-47fe-bf9b-3a7e6ed37d61?format=file'}, {'filename': 'Volume 5 Pricing.pdf', 'docxurl': 'https://api.pdfrest.com/resource/2e12b5eef-6175-4950-859a-837d55f7615a?format=file'}, {'filename': 'Volume 6 Departures.pdf', 'docxurl': 'https://api.pdfrest.com/resource/2e25537c8-b0b1-4edd-a194-8ae4c417449d?format=file'}]
-            return jsonify({'files': docx_urls}), 200
+        # docx_urls = [{'filename': 'Annexure 1 - Tender Acknowledgement and Execution.pdf', 'docxurl': 'https://api.pdfrest.com/resource/223d3b5a4-79eb-4735-8a43-ce114482aea2?format=file'}, {'filename': 'Annexure 2 - Volume 1 Tenderer Details.pdf', 'docxurl': 'https://api.pdfrest.com/resource/204866a2b-1876-4f0b-95b3-42f7658814a6?format=file'}, {'filename': 'Volume 2 Delivery Capability and Experience.pdf', 'docxurl': 'https://api.pdfrest.com/resource/2ceed7cb5-da4f-4796-b11c-0f0ce8a97568?format=file'}, {'filename': 'Volume 3 Workplace Health Safety and Environment WHSE.pdf',
+            #  'docxurl': 'https://api.pdfrest.com/resource/23ac90013-7793-4a27-9de8-f7e791f186d7?format=file'}, {'filename': 'Volume 4 Delivery Strategy.pdf', 'docxurl': 'https://api.pdfrest.com/resource/22cfc5d4f-0198-47fe-bf9b-3a7e6ed37d61?format=file'}, {'filename': 'Volume 5 Pricing.pdf', 'docxurl': 'https://api.pdfrest.com/resource/2e12b5eef-6175-4950-859a-837d55f7615a?format=file'}, {'filename': 'Volume 6 Departures.pdf', 'docxurl': 'https://api.pdfrest.com/resource/2e25537c8-b0b1-4edd-a194-8ae4c417449d?format=file'}]
+
+        return jsonify({'files': docx_urls}), 200
 
     except Exception as e:
+        import time
+        time.sleep(0.2)
+        # Remove the input folder and its contents
+        remove_files_in_folder(input_folder)
         print(e)
         return jsonify({'error': f'An error occurred during processing: {str(e)}'}), 500
 

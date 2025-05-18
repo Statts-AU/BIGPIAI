@@ -31,6 +31,7 @@ def check_toc_in_pdf(pdf_content):
         result = response.choices[0].message.content.strip().lower()
         return result == "true"
     except Exception as e:
-        print(f"Error with OpenAI API: {e}")
-        return False
-
+        raise Exception(
+            f"Error checking TOC in PDF: {e}. Please check the PDF content and try again."
+        )
+    
