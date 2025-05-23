@@ -52,25 +52,6 @@
               <p class="text-sm text-gray-500 mt-4">Supported format: .docx</p>
             </div>
 
-            <div id="upload-dragover-phase2" class="hidden">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                class="h-16 w-16 mx-auto text-blue-600 mb-4"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                ></path>
-              </svg>
-              <h3 class="text-xl font-semibold text-blue-700 mb-2">
-                Drop Your File to Start Processing
-              </h3>
-            </div>
 
             <div id="upload-processing-phase2" class="hidden">
               <div
@@ -141,35 +122,6 @@
 
               <!-- Document Structure Preview -->
               <div id="document-structure" class="divide-y">
-                <!-- Example Section 1 -->
-                <!-- <div
-                  class="px-4 py-3 hover:bg-gray-50 flex justify-between items-center"
-                >
-                  <div class="flex items-center">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      class="h-5 w-5 text-gray-500 mr-2"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"
-                      ></path>
-                    </svg>
-                    <span>1. Introduction</span>
-                  </div>
-                  <button
-                    class="text-blue-600 hover:text-blue-800 font-medium text-sm"
-                  >
-                    Download
-                  </button>
-                </div> -->
-      
-              
               </div>
             </div>
           </div>
@@ -268,242 +220,257 @@
       });
       });
     </script>
-
-    <script>
-      document.addEventListener("DOMContentLoaded", function () {
-        // Elements
-        const uploadArea = document.getElementById("upload-area-phase2");
-        const uploadDefault = document.getElementById("upload-default-phase2");
-        const uploadDragover = document.getElementById(
-          "upload-dragover-phase2"
-        );
-        const documentStructure = document.getElementById(
-          "document-structure"
-        );
+  </div>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      // Elements
+      const uploadArea = document.getElementById("upload-area-phase2");
+      const uploadDefault = document.getElementById("upload-default-phase2");
     
+      const documentStructure = document.getElementById(
+        "document-structure"
+      );
+  
 
-        const uploadProcessing = document.getElementById(
-          "upload-processing-phase2"
-        );
-        const fileInput = document.getElementById("file-input-phase2");
-        const browseButton = document.getElementById("browse-button-phase2");
-        const progressIndicator = document.getElementById(
-          "progress-indicator-phase2"
-        );
-        const progressText = document.getElementById("progress-text-phase2");
-        const resultsArea = document.getElementById("results-area-phase2");
-        const restartButton = document.getElementById("restart-button-phase2");
-        const downloadAllButton = document.getElementById(
-          "download-all-button-phase2"
-        );
-        const filename = document.getElementById("filename-phase2");
+      const uploadProcessing = document.getElementById(
+        "upload-processing-phase2"
+      );
+      const fileInput = document.getElementById("file-input-phase2");
+      const browseButton = document.getElementById("browse-button-phase2");
+      const progressIndicator = document.getElementById(
+        "progress-indicator-phase2"
+      );
+      const progressText = document.getElementById("progress-text-phase2");
+      const resultsArea = document.getElementById("results-area-phase2");
+      const restartButton = document.getElementById("restart-button-phase2");
+      const downloadAllButton = document.getElementById(
+        "download-all-button-phase2"
+      );
+      const filename = document.getElementById("filename-phase2");
 
-        // Drag and drop functionality
-        uploadArea.addEventListener("dragover", function (e) {
-          e.preventDefault();
-          uploadDefault.classList.add("hidden");
-          uploadDragover.classList.remove("hidden");
-          uploadArea.classList.add("border-blue-500");
-          uploadArea.classList.add("bg-blue-100");
-        });
+      // Drag and drop functionality
+      uploadArea.addEventListener("dragover", function (e) {
+        e.preventDefault();
 
-        
-        uploadArea.addEventListener("dragleave", function (e) {
-          e.preventDefault();
-          uploadDefault.classList.remove("hidden");
-          uploadDragover.classList.add("hidden");
-          uploadArea.classList.remove("border-blue-500");
-          uploadArea.classList.remove("bg-blue-100");
-        });
+        uploadArea.classList.add("border-blue-500", "bg-blue-100");
+      });
 
-        uploadArea.addEventListener("drop",async function (e) {
-          e.preventDefault();
-          const files = e.dataTransfer.files;
-          await handleFile(files[0]);
-        });
-
-        // Browse button functionality
-        browseButton.addEventListener("click", function () {
-          fileInput.click();
-        });
-
-        fileInput.addEventListener("change",async function () {
-          if (fileInput.files.length > 0) {
-            console.log('change event is triggered !');
-            await handleFile(fileInput.files[0]);
-          }
-        });
-
-        // Restart button functionality
-        restartButton.addEventListener("click", function () {
-          resultsArea.classList.add("hidden");
-          uploadDefault.classList.remove("hidden");
-          uploadProcessing.classList.add("hidden");
-          uploadArea.classList.remove("hidden");
-          fileInput.value = "";
-          progressIndicator.style.width = "0%";
-          progressText.textContent = "0%";
-        });
-
-        async function handleFile(file) {
-          console.log("called handleFile !");
-          if (file && file.name.endsWith(".docx")) {
-
-            // Update UI for processing
-            uploadDefault.classList.add("hidden");
-            uploadDragover.classList.add("hidden");
-            uploadProcessing.classList.remove("hidden");
-            uploadArea.classList.remove("border-blue-500");
-            // Set filename
-            filename.textContent = file.name;
-
-            //create a zip file 
-            const zip = new JSZip();
-            if (file) zip.file(file.name, file);
-
-            try {
-              // Generate the zip file
-              const zipFile = await zip.generateAsync({ type: "blob" });
-              // Create FormData and append file
-              const formData = new FormData();
-              formData.append("zip_file", zipFile);
       
-              // Send request to upload endpoint with JWT token in headers
-              const response =await fetch("/upload-phase2", {
-                method: "POST",
-                body: formData,
-                credentials: "include",
-              })
+      uploadArea.addEventListener("dragleave", function (e) {
+        e.preventDefault();
+        uploadArea.classList.remove("border-blue-500", "bg-blue-100");
+      });
+
+      uploadArea.addEventListener("drop",async function (e) {
+        e.preventDefault();
+        uploadArea.classList.remove("border-blue-500", "bg-blue-100");
+        const files = e.dataTransfer.files;
+        await handleFile(files[0]);
+      });
+
+      // Browse button functionality
+      browseButton.addEventListener("click", function () {
+        fileInput.click();
+      });
+
+      fileInput.addEventListener("change",async function () {
+        console.log("fileInput change event is triggered !");
+        if (fileInput.files.length > 0) {
+          console.log('change event is triggered !');
+          await handleFile(fileInput.files[0]);
+        }
+      });
+
+      // Restart button functionality
+      restartButton.addEventListener("click", function () {
+        showDefault();
+      });
+
+      async function handleFile(file) {
+        console.log("called handleFile !");
+        if (file && file.name.endsWith(".docx")) {
+
+          // Update UI for processing
+          showLoading();
+      
+          // Set filename
+          filename.textContent = file.name;
+
+          //create a zip file 
+          const zip = new JSZip();
+          if (file) zip.file(file.name, file);
+
+          try {
+            // Generate the zip file
+            const zipFile = await zip.generateAsync({ type: "blob" });
+            // Create FormData and append file
+            const formData = new FormData();
+            formData.append("zip_file", zipFile);
+    
+            // Send request to upload endpoint with JWT token in headers
+            const response =await fetch("/upload-phase2", {
+              method: "POST",
+              body: formData,
+              credentials: "include",
+            })
 
 
-               if (!response.ok) {
-                throw new Error(`Server error: ${response.statusText}`);
+             if (!response.ok) {
+              throw new Error(`Server error: ${response.statusText}`);
+            }
+
+            if (response.redirected) {
+                console.log("Redirect detected to:", response.url);
+                window.location.href = response.url; // Redirect the browser
+                return; // Exit the function early
               }
 
-              if (response.redirected) {
-                  console.log("Redirect detected to:", response.url);
-                  window.location.href = response.url; // Redirect the browser
-                  return; // Exit the function early
-                }
+            const data = await response.json();
+            data.files.forEach(doc => { 
+              // const docUrl =downloadFile(doc.docxurl)
+              const docElement = createDocumentList(doc.filename, doc.docxurl);
+              documentStructure.appendChild(docElement);
+            });
 
-              const data = await response.json();
-              data.files.forEach(doc => { 
-                // const docUrl =downloadFile(doc.docxurl)
-                const docElement = createDocumentList(doc.filename, doc.docxurl);
-                documentStructure.appendChild(docElement);
-              });
+            // Show success UI
+            showSuccess();
+            // uploadArea.classList.add("hidden");
+            // resultsArea.classList.remove("hidden");
 
-              // Show success UI
+          } catch (error) {
+            alert("An error occurred during upload");
+            // uploadDefault.classList.remove("hidden");
+            showDefault();
+            // uploadProcessing.classList.add("hidden");
+            console.error("Error during processing:", error);
+          }
+
+        } else {
+          console.log("file is not a docx file !");
+          alert("Please upload a valid DOCX file.");
+          // uploadDefault.classList.remove("hidden");
+          showDefault();
+          
+        }
+      }
+
+      function simulateProcessing() {
+        let progress = 0;
+        const interval = setInterval(() => {
+          progress += Math.random() * 15;
+          if (progress > 100) progress = 100;
+
+          progressIndicator.style.width = `${progress}%`;
+          progressText.textContent = `${Math.round(progress)}%`;
+
+          if (progress === 100) {
+            clearInterval(interval);
+            // Show results after a brief delay
+            setTimeout(() => {
               uploadArea.classList.add("hidden");
               resultsArea.classList.remove("hidden");
-
-            } catch (error) {
-              alert("An error occurred during upload");
-              uploadDefault.classList.remove("hidden");
-              uploadProcessing.classList.add("hidden");
-              console.error("Error during processing:", error);
-            }
-
-          } else {
-            console.log("file is not a docx file !");
-            alert("Please upload a valid DOCX file.");
-            uploadDefault.classList.remove("hidden");
-            uploadDragover.classList.add("hidden");
+            }, 500);
           }
-        }
-
-        function simulateProcessing() {
-          let progress = 0;
-          const interval = setInterval(() => {
-            progress += Math.random() * 15;
-            if (progress > 100) progress = 100;
-
-            progressIndicator.style.width = `${progress}%`;
-            progressText.textContent = `${Math.round(progress)}%`;
-
-            if (progress === 100) {
-              clearInterval(interval);
-              // Show results after a brief delay
-              setTimeout(() => {
-                uploadArea.classList.add("hidden");
-                resultsArea.classList.remove("hidden");
-              }, 500);
-            }
-          }, 600);
-        }
-
-      function createDocumentList(filename, fileUrl) {
-        console.log('filename:', filename);
-        console.log('fileUrl:', fileUrl);
-        // Create the container div
-        const container = document.createElement('div');
-        container.className = 'px-4 py-3 hover:bg-gray-50 flex justify-between items-center';
-
-        // Create the left section with the icon and filename
-        const leftSection = document.createElement('div');
-        leftSection.className = 'flex items-center';
-
-        const icon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-        icon.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
-        icon.setAttribute('class', 'h-5 w-5 text-gray-500 mr-2');
-        icon.setAttribute('fill', 'none');
-        icon.setAttribute('viewBox', '0 0 24 24');
-        icon.setAttribute('stroke', 'currentColor');
-
-        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-        path.setAttribute('stroke-linecap', 'round');
-        path.setAttribute('stroke-linejoin', 'round');
-        path.setAttribute('stroke-width', '2');
-        path.setAttribute('d', 'M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z');
-
-        icon.appendChild(path);
-
-        const fileNameSpan = document.createElement('span');
-        fileNameSpan.textContent = filename;
-
-        leftSection.appendChild(icon);
-        leftSection.appendChild(fileNameSpan);
-
-        // Create the download button
-        const downloadButton = document.createElement('a');
-        downloadButton.className = 'text-blue-600 hover:text-blue-800 font-medium text-sm';
-        downloadButton.href = fileUrl;
-        downloadButton.download = filename;
-        downloadButton.textContent = 'Download';
-
-        // Assemble the container
-        container.appendChild(leftSection);
-        container.appendChild(downloadButton);
-
-        return container;
+        }, 600);
       }
 
+    function createDocumentList(filename, fileUrl) {
+      console.log('filename:', filename);
+      console.log('fileUrl:', fileUrl);
+      // Create the container div
+      const container = document.createElement('div');
+      container.className = 'px-4 py-3 hover:bg-gray-50 flex justify-between items-center';
 
-      async function downloadFile(fileUrl) {
-        console.log('fileUrl:', fileUrl);
-        try {
-          const response = await fetch(fileUrl, {
-            mode: 'cors',
-          });
+      // Create the left section with the icon and filename
+      const leftSection = document.createElement('div');
+      leftSection.className = 'flex items-center';
 
-          if (!response.ok) {
-            throw new Error(`HTTP error! Status: ${response.status}`);
-          }
+      const icon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      icon.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+      icon.setAttribute('class', 'h-5 w-5 text-gray-500 mr-2');
+      icon.setAttribute('fill', 'none');
+      icon.setAttribute('viewBox', '0 0 24 24');
+      icon.setAttribute('stroke', 'currentColor');
 
-          const blob = await response.blob();
-          const blobUrl = window.URL.createObjectURL(blob);
-          console.log('Blob URL:', blobUrl);
+      const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      path.setAttribute('stroke-linecap', 'round');
+      path.setAttribute('stroke-linejoin', 'round');
+      path.setAttribute('stroke-width', '2');
+      path.setAttribute('d', 'M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z');
 
-          return blobUrl; 
-        } catch (error) {
+      icon.appendChild(path);
 
-            console.error('Download failed:', error);
-            throw new Error('An error occurred while downloading the file.');
+      const fileNameSpan = document.createElement('span');
+      fileNameSpan.textContent = filename;
+
+      leftSection.appendChild(icon);
+      leftSection.appendChild(fileNameSpan);
+
+      // Create the download button
+      const downloadButton = document.createElement('a');
+      downloadButton.className = 'text-blue-600 hover:text-blue-800 font-medium text-sm';
+      downloadButton.href = fileUrl;
+      downloadButton.download = filename;
+      downloadButton.textContent = 'Download';
+
+      // Assemble the container
+      container.appendChild(leftSection);
+      container.appendChild(downloadButton);
+
+      return container;
+    }
+
+
+    async function downloadFile(fileUrl) {
+      console.log('fileUrl:', fileUrl);
+      try {
+        const response = await fetch(fileUrl, {
+          mode: 'cors',
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
         }
+
+        const blob = await response.blob();
+        const blobUrl = window.URL.createObjectURL(blob);
+        console.log('Blob URL:', blobUrl);
+
+        return blobUrl; 
+      } catch (error) {
+
+          console.error('Download failed:', error);
+          throw new Error('An error occurred while downloading the file.');
       }
+    }
 
+    function showSuccess(){
+      uploadArea.classList.add("hidden");
+      resultsArea.classList.remove("hidden");
+      uploadProcessing.classList.add("hidden");
+      uploadDefault.classList.add("hidden");
+      
+    }
 
-      });
-    </script>
-  </div>
+    function showLoading(){
+      uploadArea.classList.remove("hidden");
+      resultsArea.classList.add("hidden");
+      uploadDefault.classList.add("hidden");
+      uploadProcessing.classList.remove("hidden");
+    }
+
+    function showDefault(){
+      uploadArea.classList.remove("hidden");
+      resultsArea.classList.add("hidden");
+      uploadDefault.classList.remove("hidden");
+
+      uploadProcessing.classList.add("hidden");
+      fileInput.value = "";
+      progressIndicator.style.width = "0%";
+      progressText.textContent = "0%";
+      documentStructure.innerHTML = '';
+      filename.textContent = ''; 
+    }
+    });
+  </script>
 </section>

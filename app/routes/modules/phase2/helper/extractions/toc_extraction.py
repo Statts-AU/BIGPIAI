@@ -18,7 +18,6 @@ def import_custom():
         format_toc_page_for_extraction,
         format_non_toc_page_for_extraction
     )
-    
     return (
         client,
         format_content_for_toc_endpage_extraction,
@@ -66,7 +65,8 @@ def extract_toc_from_toc_page(page_contents):
 
     except Exception as e:
         print(f"⚠️ Error extracting TOC with GPT: {e}")
-        return []
+        raise Exception(
+            f"Error extracting TOC with GPT: {e}. Please check the PDF content and try again.")
 
 
 def extract_toc_from_nontoc_content(page_contents):
@@ -97,7 +97,9 @@ def extract_toc_from_nontoc_content(page_contents):
 
     except Exception as e:
         print(f"⚠️ Error extracting TOC with GPT: {e}")
-        return []
+        raise Exception(
+            f"Error extracting TOC with GPT: {e}. Please check the PDF content and try again."
+        )
 
 
 if __name__ == "__main__":

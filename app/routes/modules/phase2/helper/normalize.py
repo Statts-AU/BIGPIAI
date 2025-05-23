@@ -2,6 +2,7 @@ import fitz  # PyMuPDF
 import PyPDF2
 import pymupdf4llm
 
+
 def normalize_for_comparison(text):
     """Normalize text for comparison by standardizing hyphens and spaces"""
     # Replace all types of hyphens/dashes with standard hyphen
@@ -80,9 +81,22 @@ def format_toc_page_for_extraction(page_contents, toc_end_page):
 
 
 def format_non_toc_page_for_extraction(page_contents):
-   
+
     document_text = "\n".join(
         [f"===== PAGE {page['page']} =====\n{page['text']}\n" for page in page_contents]
     )
 
     return document_text
+
+
+def format_toccontent_for_tocpage(page_contents, toc_end_page):
+
+    toc_text = "\n".join(
+        [
+            f"===== PAGE {page['page']} =====\n{page['text']}" if len(page['text']) <= 400
+            else f"===== PAGE {page['page']} =====\n{page['text'][:400]}..."
+            for page in page_contents[toc_end_page + 1:]
+        ]
+    )
+
+    return toc_text

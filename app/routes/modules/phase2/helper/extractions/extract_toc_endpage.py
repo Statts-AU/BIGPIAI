@@ -1,13 +1,14 @@
 # Add the parent directory to sys.path
-import os 
-import sys 
-
+import os
+import sys
+from ..openai_client import client
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
+
 def import_custom():
     from ..normalize import format_content_for_toc_endpage_extraction
-    return  format_content_for_toc_endpage_extraction
+    return format_content_for_toc_endpage_extraction
 
 
 format_content_for_toc_endpage_extraction = import_custom()
@@ -38,6 +39,8 @@ def extract_toc_endpage(page_contents):
         # print('toc_end_page', toc_end_page)
     except Exception as e:
         print(f"⚠️ Error detecting TOC end page: {e}")
-        toc_end_page = 0
+        raise Exception(
+            f"Error detecting TOC end page: {e}. Please check the PDF content and try again."
+        )
 
     return toc_end_page
