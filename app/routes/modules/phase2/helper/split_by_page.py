@@ -1,9 +1,15 @@
 
+from win32com.client import DispatchEx, constants
+from win32com.client import gencache, constants
+import win32com.client as win32
+import pythoncom
+import gc
+import time
+import os
 from PyPDF2 import PdfReader, PdfWriter
 from PyPDF2 import PageObject
 import io
 from reportlab.pdfgen import canvas
-
 
 
 def create_pdf_for_toc(pdf_file, title, start_page, end_page, toc_entries):
@@ -125,3 +131,139 @@ def add_toc_page(toc_entries, pdf_writer, pdf_reader):
     pdf_writer.add_page(toc_page)
 
 
+def create_docx_start_endpage(input_path: str,
+                              start_page: int,
+                              end_page: int,
+                              output_path: str,
+                              title: str,
+                              toc_entries: list[dict]) -> None:
+    """
+    Opens `input_docx`, pulls pages [start_page..end_page], then
+    builds a new document:
+      • page 1 = title
+      • page 2 = manual right-aligned TOC
+      • pages 3+ = the extracted pages
+    and saves it to `output_docx`.
+
+    This version:
+    - Converts both paths to absolute.
+    - Suppresses Word alerts.
+    - Ensures both docs are closed before quitting Word.
+    - Uses DispatchEx to avoid reusing an existing Word instance.
+    """
+
+    input_path = os.path.abspath(input_path)
+    output_path = os.path.abspath(output_path)
+
+    print(f"Creating document from {input_path} ")
+    print(f"Saving to {output_path} with pages {start_page} to {end_page}")
+
+    
+
+    # 2) Kill any stale lock-files (~$...)
+    for path in (input_path, output_path):
+        lock = os.path.join(os.path.dirname(
+            path), "~$" + os.path.basename(path))
+        if os.path.exists(lock):
+            try:
+                os.remove(lock)
+            except:
+                pass
+
+    # 3) Remove old output so SaveAs2 won’t complain
+    if os.path.exists(output_path):
+        try:
+            os.remove(output_path)
+        except PermissionError:
+            # if locked, rename it
+            os.replace(output_path, output_path + ".old")
+
+    # 4) Start Word
+    pythoncom.CoInitialize()
+    word = DispatchEx("Word.Application")
+    # suppress any prompts
+    word.DisplayAlerts = constants.wdAlertsNone
+    word.Visible = False
+
+    src = out = None
+    try:
+        # 5) Open source read-only
+        src = word.Documents.Open(
+            input_path,
+            ReadOnly=True,
+            ConfirmConversions=False,
+            AddToRecentFiles=False
+        )
+
+        # 6) Clamp pages
+        total = src.ComputeStatistics(constants.wdStatisticPages)
+        if not (1 <= start_page <= total):
+            raise ValueError(f"start_page must be between 1 and {total}")
+        end_page = min(end_page, total)
+
+        # 7) Copy the requested slice
+        go1 = src.GoTo(What=constants.wdGoToPage,
+                       Which=constants.wdGoToAbsolute,
+                       Count=start_page)
+        if end_page < total:
+            go2 = src.GoTo(What=constants.wdGoToPage,
+                           Which=constants.wdGoToAbsolute,
+                           Count=end_page+1)
+            slice_end = go2.Start - 1
+        else:
+            slice_end = src.Content.End
+
+        src.Range(Start=go1.Start, End=slice_end).Copy()
+
+        # 8) Build the new doc via Selection
+        out = word.Documents.Add()
+        word.Selection.HomeKey(Unit=constants.wdStory)
+
+        # 8a) Title page
+        word.Selection.TypeText(title)
+        word.Selection.InsertBreak(constants.wdPageBreak)
+
+        # 8b) TOC page with right-aligned numbers
+        pw = out.PageSetup.PageWidth
+        lm = out.PageSetup.LeftMargin
+        rm = out.PageSetup.RightMargin
+        usable = pw - lm - rm
+
+        pf = word.Selection.ParagraphFormat
+        pf.TabStops.ClearAll()
+        pf.TabStops.Add(Position=usable, Alignment=constants.wdAlignTabRight)
+
+        word.Selection.TypeText("Table of Contents")
+        word.Selection.TypeParagraph()
+        for entry in toc_entries:
+            sec = entry.get("section", "")
+            pg = entry.get("start_page", "")
+            word.Selection.TypeText(f"{sec}\t{pg}")
+            word.Selection.TypeParagraph()
+        word.Selection.InsertBreak(constants.wdPageBreak)
+
+        # 8c) Paste the pages slice
+        word.Selection.EndKey(Unit=constants.wdStory)
+        word.Selection.Paste()
+
+        # 9) Save
+        out.SaveAs2(FileName=output_path)
+
+    finally:
+        # 10) Always close documents (no prompts)
+        if out:
+            try:
+                out.Close(SaveChanges=False)
+            except:
+                pass
+        if src:
+            try:
+                src.Close(SaveChanges=False)
+            except:
+                pass
+        # 11) Quit Word & uninit COM
+        try:
+            word.Quit()
+        except:
+            pass
+        pythoncom.CoUninitialize()

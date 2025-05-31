@@ -10,6 +10,7 @@ def login():
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
+        print(username, password)
 
         if not username or not password:
             flash('Username and password are required')

@@ -3,7 +3,7 @@ from PyPDF2 import PdfReader
 
 from .helper.extractions.extract_page_from_content import extract_page_from_content
 from .helper.converter.docx_to_pdf import convert_docx_to_pdf
-from .helper.split_by_page import create_pdf_for_toc
+from .helper.split_by_page import create_docx_start_endpage
 from .helper.extractions.toc_extraction import extract_toc_from_nontoc_content, extract_toc_from_toc_page
 from .helper.check_toc import check_toc_in_pdf
 from .helper.normalize import read_pdf
@@ -34,7 +34,6 @@ def process_document(input_docx):
             print("Table of Contents found in the document.")
             sections = extract_toc_from_toc_page(page_contents)
             toc_entries = extract_page_from_content(page_contents, sections)
-           
 
         add_end_page_in_toc_entries(toc_entries, pdf_file=pdf_file)
         print('document toc :')
@@ -60,22 +59,36 @@ def process_document(input_docx):
 
             print(f"Extracted TOC for section: {title}")
             printTocEntries(curr_tocs)
+            import re
+            safe_title = re.sub(r'[<>:"/\\|?*]', '_', title)
+            create_docx_start_endpage(
+                input_path=input_docx,
+                start_page=start_page+1,
+                end_page=end_page+1,
+                output_path=os.path.join(
+                    output_dir, f"{safe_title}.docx"),
+                title=title,
+                toc_entries=curr_tocs
+            )
+            output_paths.append(os.path.join(
+                output_dir, f"{safe_title}.docx"))
 
-            pdf_writer = create_pdf_for_toc(
-                pdf_file, title, start_page, end_page, curr_tocs)
+            # pdf_writer = create_pdf_for_toc(
+            #     pdf_file, title, start_page, end_page, curr_tocs)
 
             # Generate output filename
-            safe_title = "".join(x for x in title if x.isalnum()
-                                 or x in (' ', '-', '_')).strip()
-            output_filename = f"{safe_title}.pdf"
-            output_path = os.path.join(output_dir, output_filename)
+            # safe_title = "".join(x for x in title if x.isalnum()
+            #                      or x in (' ', '-', '_')).strip()
+            # output_filename = f"{safe_title}.pdf"
+            # output_path = os.path.join(output_dir, output_filename)
 
             # Save the section
-            with open(output_path, 'wb') as output_file:
-                pdf_writer.write(output_file)
-            print(f"✅ Created: {output_filename}")
-            print("-----------------------")
-            output_paths.append(output_path)
+            # with open(output_path, 'wb') as output_file:
+            #     pdf_writer.write(output_file)
+            # print(f"✅ Created: {output_filename}")
+            # print("-----------------------")
+
+            # output_paths.append(output_path)
 
         return output_paths
 

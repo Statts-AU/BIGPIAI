@@ -325,17 +325,23 @@
                 return; // Exit the function early
               }
 
-            const data = await response.json();
-            data.files.forEach(doc => { 
-              // const docUrl =downloadFile(doc.docxurl)
-              const docElement = createDocumentList(doc.filename, doc.docxurl);
-              documentStructure.appendChild(docElement);
-            });
+            console.log("Response received:", response);
+            const blob = await response.blob();
+            const zipContent = await JSZip.loadAsync(blob);
+
+            for (const fileName in zipContent.files) {
+              const file = zipContent.files[fileName];
+              if (!file.dir) {
+                const content = await file.async('blob'); 
+                const fileUrl = URL.createObjectURL(content);
+                const docElement = createDocumentList(fileName, fileUrl);
+                documentStructure.appendChild(docElement);
+              }
+            }
+            console.log("Document structure created:", documentStructure);
 
             // Show success UI
             showSuccess();
-            // uploadArea.classList.add("hidden");
-            // resultsArea.classList.remove("hidden");
 
           } catch (error) {
             alert("An error occurred during upload");
