@@ -1,6 +1,6 @@
 import fitz  # PyMuPDF
 import PyPDF2
-import pymupdf4llm
+# import pymupdf4llm
 
 
 def normalize_for_comparison(text):
