@@ -1,7 +1,9 @@
 
 from PyPDF2 import PdfReader
 
-from .helper.extractions.extract_page_from_content import extract_page_from_content
+from .helper.extractions.extract_toc_endpage import extract_toc_endpage
+
+from .helper.extractions.extract_page_from_content import extract_page_from_content, find_section_start_pages
 from .helper.converter.docx_to_pdf import convert_docx_to_pdf
 from .helper.split_by_page import create_docx_start_endpage
 from .helper.extractions.toc_extraction import extract_toc_from_nontoc_content, extract_toc_from_toc_page
@@ -20,25 +22,37 @@ def process_document(input_docx):
 
         pdf_file = convert_docx_to_pdf(input_docx)
 
-        # pdf_file = 'document.pdf'
         page_contents = read_pdf(pdf_file)
+
         print("path for pdf file is : ", pdf_file)
+
+
 
         # list of dict containing section and start page [ {"section": "section_name", "start_page": 1} ..]
         toc_entries = []
+        toc_end_page = -1
         if not check_toc_in_pdf(page_contents):
             print("No Table of Contents found in the document.")
             toc_entries = extract_toc_from_nontoc_content(
                 page_contents)
         else:
             print("Table of Contents found in the document.")
+            toc_end_page = extract_toc_endpage(page_contents)
             sections = extract_toc_from_toc_page(page_contents)
-            toc_entries = extract_page_from_content(page_contents, sections)
+            toc_entries = extract_page_from_content(
+                page_contents, sections, toc_end_page)
 
-        add_end_page_in_toc_entries(toc_entries, pdf_file=pdf_file)
-        print('document toc :')
+        print("Extracted TOC Entries by GPT :")
         printTocEntries(toc_entries)
         print("-----------------------")
+
+        print("Extracted TOC Entries by My functions :")
+        toc_entries = find_section_start_pages(
+            document_pages=page_contents[toc_end_page+1:], toc_entries=toc_entries)
+        add_end_page_in_toc_entries(toc_entries, pdf_file=pdf_file)
+        printTocEntries(toc_entries)
+        print("-----------------------")
+        print("------------------------\n")
 
         output_dir = os.path.join(os.path.dirname(
             pdf_file), 'truncated_schedules')
@@ -57,38 +71,33 @@ def process_document(input_docx):
             curr_tocs = extract_toc_from_nontoc_content(
                 page_contents=page_contents[start_page:end_page+1])
 
-            print(f"Extracted TOC for section: {title}")
+            print(f"Extracted TOC for section by GPT: {title}")
             printTocEntries(curr_tocs)
+            print("-----------------------")
+            curr_tocs = find_section_start_pages(
+                document_pages=page_contents[start_page:end_page+1], toc_entries=curr_tocs)
+            print(
+                f"Updated TOC with start pages for section by My function: {title}")
+            printTocEntries(curr_tocs)
+            print("-----------------------")
+            print("------------------------\n")
+
             import re
             safe_title = re.sub(r'[<>:"/\\|?*]', '_', title)
+
+            output_path = os.path.join(
+                output_dir, f"{safe_title}.docx")
+
             create_docx_start_endpage(
                 input_path=input_docx,
                 start_page=start_page+1,
                 end_page=end_page+1,
-                output_path=os.path.join(
-                    output_dir, f"{safe_title}.docx"),
+                output_path=output_path,
                 title=title,
                 toc_entries=curr_tocs
             )
-            output_paths.append(os.path.join(
-                output_dir, f"{safe_title}.docx"))
 
-            # pdf_writer = create_pdf_for_toc(
-            #     pdf_file, title, start_page, end_page, curr_tocs)
-
-            # Generate output filename
-            # safe_title = "".join(x for x in title if x.isalnum()
-            #                      or x in (' ', '-', '_')).strip()
-            # output_filename = f"{safe_title}.pdf"
-            # output_path = os.path.join(output_dir, output_filename)
-
-            # Save the section
-            # with open(output_path, 'wb') as output_file:
-            #     pdf_writer.write(output_file)
-            # print(f"✅ Created: {output_filename}")
-            # print("-----------------------")
-
-            # output_paths.append(output_path)
+            output_paths.append(output_path)
 
         return output_paths
 
@@ -104,7 +113,10 @@ def add_end_page_in_toc_entries(toc_entries, pdf_file):
         # Calculate end page
         if i < len(toc_entries) - 1:
             # Get the page number of the next section's start
-            end_page = toc_entries[i + 1]['start_page'] - 1
+            if toc_entries[i + 1]['start_page'] is not None and toc_entries[i+1]['start_page'] == toc_entries[i]['start_page']:
+                end_page = toc_entries[i]['start_page']
+            else:
+                end_page = toc_entries[i + 1]['start_page'] - 1
         else:
             # For the last section, use the total number of pages
             end_page = total_pages-1

@@ -3,7 +3,7 @@ from pydantic import BaseModel
 
 class Section(BaseModel):
     name: str
-    page_number: str
+    page_number: int
 
 
 class TocEntries(BaseModel):

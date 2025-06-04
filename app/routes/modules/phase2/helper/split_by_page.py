@@ -1,6 +1,5 @@
 
 from win32com.client import DispatchEx, constants
-from win32com.client import gencache, constants
 import win32com.client as win32
 import pythoncom
 import gc
@@ -155,11 +154,6 @@ def create_docx_start_endpage(input_path: str,
     input_path = os.path.abspath(input_path)
     output_path = os.path.abspath(output_path)
 
-    print(f"Creating document from {input_path} ")
-    print(f"Saving to {output_path} with pages {start_page} to {end_page}")
-
-    
-
     # 2) Kill any stale lock-files (~$...)
     for path in (input_path, output_path):
         lock = os.path.join(os.path.dirname(
@@ -220,7 +214,14 @@ def create_docx_start_endpage(input_path: str,
         word.Selection.HomeKey(Unit=constants.wdStory)
 
         # 8a) Title page
+        word.Selection.ParagraphFormat.Alignment = constants.wdAlignParagraphCenter
+        word.Selection.Font.Size = 36
+        word.Selection.Font.Bold = True
+        word.Selection.Font.Color = constants.wdColorRed
         word.Selection.TypeText(title)
+        word.Selection.Font.Size = 12  # Reset to default after title
+        word.Selection.Font.Bold = False
+        word.Selection.ParagraphFormat.Alignment = constants.wdAlignParagraphLeft
         word.Selection.InsertBreak(constants.wdPageBreak)
 
         # 8b) TOC page with right-aligned numbers
@@ -233,11 +234,16 @@ def create_docx_start_endpage(input_path: str,
         pf.TabStops.ClearAll()
         pf.TabStops.Add(Position=usable, Alignment=constants.wdAlignTabRight)
 
+        word.Selection.Font.Bold = True
+        word.Selection.Font.Color = constants.wdColorRed
         word.Selection.TypeText("Table of Contents")
+        word.Selection.TypeParagraph()
+        word.Selection.Font.Bold = False
+        word.Selection.Font.Color = constants.wdColorAutomatic
         word.Selection.TypeParagraph()
         for entry in toc_entries:
             sec = entry.get("section", "")
-            pg = entry.get("start_page", "")
+            pg = entry.get("start_page", "")-start_page + 2
             word.Selection.TypeText(f"{sec}\t{pg}")
             word.Selection.TypeParagraph()
         word.Selection.InsertBreak(constants.wdPageBreak)
@@ -262,6 +268,81 @@ def create_docx_start_endpage(input_path: str,
             except:
                 pass
         # 11) Quit Word & uninit COM
+        try:
+            word.Quit()
+        except:
+            pass
+        pythoncom.CoUninitialize()
+
+
+def slice_docx_by_pages(input_path: str, start_page: int, end_page: int, output_path: str) -> None:
+    """
+    Extracts pages from start_page to end_page (inclusive) from input_path
+    and saves to output_path. No title or TOC is added.
+    """
+
+    input_path = os.path.abspath(input_path)
+    output_path = os.path.abspath(output_path)
+
+    # Clean up any lock files
+    for path in (input_path, output_path):
+        lock = os.path.join(os.path.dirname(
+            path), "~$" + os.path.basename(path))
+        if os.path.exists(lock):
+            try:
+                os.remove(lock)
+            except:
+                pass
+
+    # Remove existing output file
+    if os.path.exists(output_path):
+        try:
+            os.remove(output_path)
+        except PermissionError:
+            os.replace(output_path, output_path + ".old")
+
+    pythoncom.CoInitialize()
+    word = DispatchEx("Word.Application")
+    word.DisplayAlerts = constants.wdAlertsNone
+    word.Visible = False
+
+    src = out = None
+    try:
+        src = word.Documents.Open(
+            input_path, ReadOnly=True, ConfirmConversions=False, AddToRecentFiles=False)
+
+        total = src.ComputeStatistics(constants.wdStatisticPages)
+        if not (1 <= start_page <= total):
+            raise ValueError(f"start_page must be between 1 and {total}")
+        end_page = min(end_page, total)
+
+        # Get start and end range
+        go1 = src.GoTo(What=constants.wdGoToPage,
+                       Which=constants.wdGoToAbsolute, Count=start_page)
+        if end_page < total:
+            go2 = src.GoTo(What=constants.wdGoToPage,
+                           Which=constants.wdGoToAbsolute, Count=end_page + 1)
+            slice_end = go2.Start - 1
+        else:
+            slice_end = src.Content.End
+
+        src.Range(Start=go1.Start, End=slice_end).Copy()
+
+        out = word.Documents.Add()
+        word.Selection.Paste()
+        out.SaveAs2(FileName=output_path)
+
+    finally:
+        if out:
+            try:
+                out.Close(SaveChanges=False)
+            except:
+                pass
+        if src:
+            try:
+                src.Close(SaveChanges=False)
+            except:
+                pass
         try:
             word.Quit()
         except:

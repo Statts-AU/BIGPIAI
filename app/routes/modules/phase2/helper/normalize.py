@@ -45,8 +45,9 @@ def read_pdf(pdf_file):
 
     # Process each page individually
     for page_number in range(total_pages):
-        md_text = pymupdf4llm.to_markdown(pdf_file, pages=[page_number])
-        page_content = {"page": page_number, "text": md_text}
+        # md_text = pymupdf4llm.to_markdown(pdf_file, pages=[page_number])
+        text = pdf_reader.pages[page_number].extract_text()
+        page_content = {"page": page_number, "text": text}
         page_contents.append(page_content)
 
     return page_contents
@@ -64,8 +65,8 @@ def format_content_for_toc_endpage_extraction(page_contents):
 
     # Extract the first 3 pages of text content
     content = "\n".join(
-        [f"=== PAGE {page['page']} ===\n{page['text']}\n"
-         for page in page_contents[:6]]
+        [f"=====PAGE {page['page']}=====\n{page['text']}\n"
+         for page in page_contents[:4]]
     )
     return content
 
@@ -83,7 +84,7 @@ def format_toc_page_for_extraction(page_contents, toc_end_page):
 def format_non_toc_page_for_extraction(page_contents):
 
     document_text = "\n".join(
-        [f"===== PAGE {page['page']} =====\n{page['text']}\n" for page in page_contents]
+        [f"=====PAGE {page['page']}=====\n{page['text']}\n" for page in page_contents]
     )
 
     return document_text
@@ -93,8 +94,7 @@ def format_toccontent_for_tocpage(page_contents, toc_end_page):
 
     toc_text = "\n".join(
         [
-            f"===== PAGE {page['page']} =====\n{page['text']}" if len(page['text']) <= 400
-            else f"===== PAGE {page['page']} =====\n{page['text'][:400]}..."
+            f"=====PAGE {page['page']}=====\n{page['text']}"
             for page in page_contents[toc_end_page + 1:]
         ]
     )

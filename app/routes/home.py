@@ -6,7 +6,7 @@ def home():
     # Try to get user identity, but don't require it
     user = None
     try:
-        verify_jwt_in_request(optional=True)
+        verify_jwt_in_request(optional=False)
         user = get_jwt_identity()
     except:
         pass

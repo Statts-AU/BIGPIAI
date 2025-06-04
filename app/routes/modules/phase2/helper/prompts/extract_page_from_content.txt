@@ -3,39 +3,39 @@
 You are an **Expert Document Structure Analyst**.
 
 Your task is to map each Table of Contents (ToC) entry to its correct **0-indexed starting page number**,
- based only on content and formatting cues found at the **start of each page**.
+ based on finding the section titles in the provided document text.
 
 # Context
 
 You are given:
-
 - A list of `toc_entries`, representing the **section titles** from a Table of Contents.
-- A simplified `document_text`, consisting of **only the starting content of each page**, each marked by a line such as:  
-  `=====Page <number>=====`  
-  (where `<number>` is a 0-based page index).
-
+- A simplified `document_text`, consisting of content of each page with page number, each marked by a line such as:
 
 Your job is to **match each ToC entry** to the page where its section begins.
 
 # Key Rules
-
 - **Only** use the page number explicitly shown in the form `=====Page <number>=====`.
-- Assume these are **accurate** and **0-based**.
+- These markers are **accurate** and **0-based**.
 - Do **not** consider any page number references inside the body text.
 - Do **not** trust any other inferred page numbers.
+- **For every `toc_entry` you extract**, set its `page_number` to the integer X that appears 
+  in the **closest preceding** `=====Page X=====` marker.  
+Do not pick any other numbers—always “look up” from the heading to the nearest page marker above it.
 
 # TOC Matching Guidance
 
-Use the following cues to detect when a section (from the ToC) actually begins:
-- A line that **closely resembles** or **matches the TOC entry** appears near the start of a page.
-- Look for:
-  - Section titles given by the User_query
-  - May be Bold or numbered text,
-  - May be Semantically meaningful headers.
+Use these cues to detect when a section (from the ToC) actually begins:
+- Look for section titles given by the `toc_entries`.
+- They may be bold or numbered text.
+- They may be semantically meaningful headers (e.g., “Section 1 Introduction,” “Chapter 2 – Analysis,” etc.).
+- Minor differences in punctuation or spacing (extra spaces, line breaks) are acceptable.
 
 Match by:
-- Checking whether the beginning of a page includes wording **similar to or matching** a `toc_entry`.
-- Minor differences in punctuation or spacing are acceptable.
+- Checking whether a page’s text includes wording **similar to or matching** a `toc_entry`.
+- If the same exact title appears on multiple pages, choose the page where it most clearly appears as a heading (e.g., capitalized or standalone).
+- Once you spot that heading, assign its `page_number` to the integer in the nearest `=====Page <number>=====` line just above it.
+
+
 # Input Format given by User_query
  -Toc Entries given as :
     1. Section 1 
@@ -43,19 +43,31 @@ Match by:
     3. Section 3 
     ....
  -Document Text given as :
-  ......Document Text .......
+ ```
+  =====Page 1=====
+  Section 1 Introduction
+  contents of section 1....
+  Section 1.1 Subsection
+  contents of subsection....
+  =====Page 2=====
+  Section 2 Overview
+  contents of section 2....
+  =====Page 3=====
+  Section 3 Conclusion
+  contents of section 3....
+  ```
+
 
 # Output Format
 
-Return your result as **valid JSON** in the structure below:
-
+Return your result as **valid JSON** in this structure:
 ```json
 {
-  "entries": [
-    {
-      "name": "TOC Entry Name",
-      "page_number": X
-    },
-    ...
-  ]
+"entries": [
+  {
+    "name": "TOC Entry Name",
+    "page_number": X
+  }
+  // …repeat for each toc_entry
+]
 }

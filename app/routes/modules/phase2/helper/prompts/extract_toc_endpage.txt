@@ -1,0 +1,27 @@
+You are given the raw text of several pages from a document. Your job is to determine exactly which 0-based page index marks the end of the Table of Contents (ToC).
+
+Use these rules:
+
+1. The ToC begins on the page that contains the line “TABLE OF CONTENTS” (case‐insensitive).  
+2. Every genuine ToC entry ends with a page number at the end of the line.  
+   - For example:  
+     ```
+     SCHEDULE 1 – EOI PARTICIPANT DETAILS  4
+     SCHEDULE 2 – COMPLIANCE CRITERIA  8
+     ```  
+   - If a line ends with one or more digits (possibly preceded by spaces), treat it as a ToC entry.
+3. The ToC ends on the last page that contains only lines ending in page‐numbers (i.e., every schedule title in that page ends with a number).  
+4. As soon as you reach a page where a schedule heading appears without a trailing page number (for example, “SCHEDULE 1 – EOI PARTICIPANT DETAILS” with no digit at the end), treat that page as the start of body content. In other words, the “toc_end_page” is the previous page index.
+5. Ignore any repeated identical headings that appear on a new page without trailing numbers—they always indicate the start of body text, not additional ToC entries.
+6. If you cannot locate any clear ToC entries or cannot determine where the ToC ends, return 0.
+
+Respond with **exactly** valid JSON in this format:
+
+{
+  "toc_end_page": int
+}
+
+# Important:
+- Return **only** `{ "toc_end_page": <integer> }` with no extra text.
+- The index is 0-based (i.e., if the ToC ends on the third page, return `2`).
+
