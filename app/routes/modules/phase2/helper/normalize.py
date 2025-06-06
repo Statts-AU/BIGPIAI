@@ -1,4 +1,4 @@
-import fitz  # PyMuPDF
+
 import PyPDF2
 # import pymupdf4llm
 
@@ -34,9 +34,6 @@ def normalize_for_comparison(text):
 #     return page_contents
 
 def read_pdf(pdf_file):
-    # Determine the total number of pages in the PDF
-    with fitz.open(pdf_file) as doc:
-        total_pages = doc.page_count
 
     pdf_reader = PyPDF2.PdfReader(pdf_file)
     total_pages = len(pdf_reader.pages)

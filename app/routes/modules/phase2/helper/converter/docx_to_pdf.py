@@ -44,6 +44,7 @@ def convert_docx_to_pdf(docx_file):
         word.DisplayAlerts = False  # optional safety
         doc = word.Documents.Open(decoded_path)
 
+        print(doc.TablesOfContents)
         for toc in doc.TablesOfContents:
             toc.Update()
 

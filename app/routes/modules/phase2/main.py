@@ -23,10 +23,8 @@ def process_document(input_docx):
         pdf_file = convert_docx_to_pdf(input_docx)
 
         page_contents = read_pdf(pdf_file)
-
         print("path for pdf file is : ", pdf_file)
-
-
+        
         # list of dict containing section and start page [ {"section": "section_name", "start_page": 1} ..]
         toc_entries = []
         toc_end_page = -1

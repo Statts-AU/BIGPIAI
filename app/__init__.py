@@ -10,11 +10,7 @@ from .routes.logout import logout  # Import your logout route
 
 
 def create_app():
-
     app = Flask(__name__)
-
-
-
     CORS(app)  # Enable CORS for all routes
 
     # Add these two lines to set the secret keys
@@ -39,3 +35,6 @@ def create_app():
     app.add_url_rule('/logout', view_func=logout)  # Add the logout route
 
     return app
+
+
+app = create_app()

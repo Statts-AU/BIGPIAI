@@ -66,7 +66,7 @@ def find_section_start_pages(document_pages, toc_entries, threshold=90):
         toc_entries (List[Dict[str, str]]):
             e.g. [ {"section": "Returnable Schedule 1: Overall capability and experience"}, … ]
         threshold (int):
-            The minimum fuzzy ratio (0–100) to accept a match.
+            The minimum fuzzy ratio (0100) to accept a match.
 
     Returns:
         List[Dict]:  The same toc_entries list, but each dict now has "start_page": <int> or None.

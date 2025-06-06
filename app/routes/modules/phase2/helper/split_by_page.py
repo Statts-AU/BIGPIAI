@@ -1,13 +1,16 @@
 
 from win32com.client import DispatchEx, constants
+import win32com
 import pythoncom
 # import gc
 # import time
 import os
 # from PyPDF2 import PdfReader, PdfWriter
 # from PyPDF2 import PageObject
-import io
 # from reportlab.pdfgen import canvas
+import win32com.client
+import tempfile
+import shutil
 
 
 # def create_pdf_for_toc(pdf_file, title, start_page, end_page, toc_entries):
@@ -129,6 +132,9 @@ import io
 #     pdf_writer.add_page(toc_page)
 
 
+
+
+
 def create_docx_start_endpage(input_path: str,
                               start_page: int,
                               end_page: int,
@@ -147,9 +153,10 @@ def create_docx_start_endpage(input_path: str,
     - Converts both paths to absolute.
     - Suppresses Word alerts.
     - Ensures both docs are closed before quitting Word.
-    - Uses DispatchEx to avoid reusing an existing Word instance.
+    - Forces deletion of any stale gen_py cache so Word’s COM wrappers rebuild cleanly.
     """
 
+    # 1) Convert to absolute paths
     input_path = os.path.abspath(input_path)
     output_path = os.path.abspath(output_path)
 
@@ -171,16 +178,28 @@ def create_docx_start_endpage(input_path: str,
             # if locked, rename it
             os.replace(output_path, output_path + ".old")
 
-    # 4) Start Word
+    # 4) Initialize COM
     pythoncom.CoInitialize()
-    word = DispatchEx("Word.Application")
-    # suppress any prompts
-    word.DisplayAlerts = constants.wdAlertsNone
+
+    # ─── Forcibly delete gen_py cache before dispatch ───
+    gen_py_cache = os.path.join(tempfile.gettempdir(), "gen_py")
+    if os.path.isdir(gen_py_cache):
+        try:
+            shutil.rmtree(gen_py_cache)
+        except Exception:
+            pass
+
+    # 5) Launch Word via EnsureDispatch so that COM wrappers regenerate
+    word = win32com.client.gencache.EnsureDispatch("Word.Application")
+    from win32com.client import constants
+
+    # Suppress any prompts/dialogs
+    word.DisplayAlerts = 0  # 0 == wdAlertsNone
     word.Visible = False
 
     src = out = None
     try:
-        # 5) Open source read-only
+        # 6) Open source document read-only
         src = word.Documents.Open(
             input_path,
             ReadOnly=True,
@@ -188,42 +207,43 @@ def create_docx_start_endpage(input_path: str,
             AddToRecentFiles=False
         )
 
-        # 6) Clamp pages
+        # 7) Clamp pages
         total = src.ComputeStatistics(constants.wdStatisticPages)
         if not (1 <= start_page <= total):
             raise ValueError(f"start_page must be between 1 and {total}")
         end_page = min(end_page, total)
 
-        # 7) Copy the requested slice
+        # 8) Copy the requested slice
         go1 = src.GoTo(What=constants.wdGoToPage,
                        Which=constants.wdGoToAbsolute,
                        Count=start_page)
         if end_page < total:
             go2 = src.GoTo(What=constants.wdGoToPage,
                            Which=constants.wdGoToAbsolute,
-                           Count=end_page+1)
+                           Count=end_page + 1)
             slice_end = go2.Start - 1
         else:
             slice_end = src.Content.End
 
         src.Range(Start=go1.Start, End=slice_end).Copy()
 
-        # 8) Build the new doc via Selection
+        # 9) Build the new document via Selection
         out = word.Documents.Add()
         word.Selection.HomeKey(Unit=constants.wdStory)
 
-        # 8a) Title page
+        # 9a) Title page
         word.Selection.ParagraphFormat.Alignment = constants.wdAlignParagraphCenter
         word.Selection.Font.Size = 36
         word.Selection.Font.Bold = True
         word.Selection.Font.Color = constants.wdColorRed
         word.Selection.TypeText(title)
-        word.Selection.Font.Size = 12  # Reset to default after title
+        # Reset font/paragraph back to default
+        word.Selection.Font.Size = 12
         word.Selection.Font.Bold = False
         word.Selection.ParagraphFormat.Alignment = constants.wdAlignParagraphLeft
         word.Selection.InsertBreak(constants.wdPageBreak)
 
-        # 8b) TOC page with right-aligned numbers
+        # 9b) TOC page with right-aligned numbers
         pw = out.PageSetup.PageWidth
         lm = out.PageSetup.LeftMargin
         rm = out.PageSetup.RightMargin
@@ -233,29 +253,35 @@ def create_docx_start_endpage(input_path: str,
         pf.TabStops.ClearAll()
         pf.TabStops.Add(Position=usable, Alignment=constants.wdAlignTabRight)
 
+        # Header for TOC
         word.Selection.Font.Bold = True
         word.Selection.Font.Color = constants.wdColorRed
         word.Selection.TypeText("Table of Contents")
         word.Selection.TypeParagraph()
+
+        # Reset to normal font/color
         word.Selection.Font.Bold = False
         word.Selection.Font.Color = constants.wdColorAutomatic
         word.Selection.TypeParagraph()
+
+        # Populate TOC entries
         for entry in toc_entries:
             sec = entry.get("section", "")
-            pg = entry.get("start_page", "")-start_page + 2
+            pg = entry.get("start_page", 0) - start_page + 2
             word.Selection.TypeText(f"{sec}\t{pg}")
             word.Selection.TypeParagraph()
+
         word.Selection.InsertBreak(constants.wdPageBreak)
 
-        # 8c) Paste the pages slice
+        # 9c) Paste the pages slice
         word.Selection.EndKey(Unit=constants.wdStory)
         word.Selection.Paste()
 
-        # 9) Save
+        # 10) Save the new document
         out.SaveAs2(FileName=output_path)
 
     finally:
-        # 10) Always close documents (no prompts)
+        # 11) Always close documents (no prompts)
         if out:
             try:
                 out.Close(SaveChanges=False)
@@ -266,7 +292,8 @@ def create_docx_start_endpage(input_path: str,
                 src.Close(SaveChanges=False)
             except:
                 pass
-        # 11) Quit Word & uninit COM
+
+        # 12) Quit Word & uninitialize COM
         try:
             word.Quit()
         except:
