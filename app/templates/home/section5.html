@@ -1,4 +1,14 @@
 <section id="section-ca0a9a64-8a0e-424b-ad5b-5e92793c1891">
+  <style>
+
+    #typingContainer {
+      scrollbar-width: none;        
+      -ms-overflow-style: none;      
+    }
+    #typingContainer::-webkit-scrollbar {
+      display: none;        
+    }
+  </style>
   <div id="root">
     <section id="upload-section" class="py-20 bg-white">
       <div id="phase-2" class="container mx-auto px-4">
@@ -13,12 +23,13 @@
         </div>
 
         <div class="max-w-4xl mx-auto">
+          
           <!-- File Upload Area -->
           <div
             id="upload-area-phase2"
-            class="border-2 border-dashed border-blue-300 rounded-lg p-10 mb-8 text-center transition-all duration-300 bg-blue-50 hover:bg-blue-100"
+            class="bg-gray-100  rounded-lg p-5"
           >
-            <div id="upload-default-phase2" class="block">
+            <div id="upload-default-phase2" class="block border-2 border-dashed border-blue-300 rounded-lg p-10 mb-2 text-center transition-all duration-300 bg-blue-50 hover:bg-blue-100">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 class="h-16 w-16 mx-auto text-blue-500 mb-4"
@@ -50,28 +61,69 @@
                 class="hidden"
               />
               <p class="text-sm text-gray-500 mt-4">Supported format: .docx</p>
+              <p id="fileNameP"></p>
             </div>
-
-
-            <div id="upload-processing-phase2" class="hidden">
-              <div
-                class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-600 mx-auto mb-4"
-              ></div>
-              <h3 class="text-xl font-semibold text-gray-800 mb-2">
-                Processing Your Document
-              </h3>
-              <p class="text-gray-600 mb-4">
-                Please wait while our AI analyzes your file...
-              </p>
-              <div class="w-full bg-gray-200 rounded-full h-2.5 mb-4">
-                <div
-                  id="progress-indicator-phase2"
-                  class="bg-blue-600 h-2.5 rounded-full w-0 transition-all duration-500"
-                ></div>
+            <div id="attach-odt" class="p-6">
+              <div class="grid grid-cols-6">
+                <div class="col-span-1 flex flex-col justify-center"> 
+                  <div>
+                    <input id="attach_template_checkbox" type="checkbox" value="" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
+                    <label for="attach_template_checkbox" class="w-full py-3 ms-2 text-sm font-medium text-black-900 dark:text-gray-700">Attach Template</label>
+                  </div>
+                </div>
+                <input
+                  id="odt_file_input"
+                  type="file"
+                  class="col-span-5 block w-full text-sm text-gray-900 bg-white border border-gray-300 rounded-lg cursor-pointer placeholder-gray-400 focus:outline-none"
+                  aria-describedby="file_input_help"
+                  accept=".dotx"
+                />
               </div>
-              <p id="progress-text-phase2" class="text-sm text-gray-500">0%</p>
+              
+            </div>
+            <div class="flex justify-center">
+              <button
+                  id="generate-template-phase2"
+                  class="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors duration-300 flex items-center justify-center shadow-lg hover:shadow-xl"
+                >
+                  <span>Generate Template </span>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="h-5 w-5 ml-2"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.707l-3-3a1 1 0 00-1.414 1.414L10.586 9H7a1 1 0 100 2h3.586l-1.293 1.293a1 1 0 101.414 1.414l3-3a1 1 0 000-1.414z"
+                      clip-rule="evenodd"
+                    ></path>
+                  </svg>
+                </button>
             </div>
           </div>
+
+           <!--stream area-->
+           <div id="progress-stream" class = "hidden bg-neutral-800 rounded-xl p-8" id = "el-8qga9ue7" >
+            <div class = "terminal-window" id = "el-ig177js6" >
+              <div class = "terminal-header mb-4" id = "el-3kz7b9uc" >
+                <div class = "flex space-x-2" id = "el-91tfppsg" >
+                  <div class = "w-3 h-3 rounded-full bg-red-500" id = "el-uio2nlcy" > </div >
+                  <div class = "w-3 h-3 rounded-full bg-yellow-500" id = "el-dumtgomc" > </div >
+                  <div class = "w-3 h-3 rounded-full bg-green-500" id = "el-qkf88inr" > </div >
+                </div >
+              </div >
+              <div class = "terminal-content  h-80 overflow-y-auto " id ="typingContainer" >
+              </div >
+              <div class="w-full bg-gray-200 rounded-full h-1 mt-1">
+                <div
+                  id="progress-indicator-phase2"
+                  class="bg-blue-600 h-1 rounded-full w-0 transition-all duration-500"
+                ></div>
+              </div>
+            </div >
+          </div>
+
 
           <!-- Results Area (Initially Hidden) -->
           <div
@@ -83,13 +135,15 @@
                 Document Structure
               </h3>
               <div>
-                <!-- <button
-                  id="download-all-button-phase2"
-                  class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition-colors duration-300 mr-2"
+                <a
+                id="download-all-button-phase2"
+                  href="https://example.com/yourfile.zip" 
+                  download
+                  class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition-colors duration-300 mr-2 inline-block"
                 >
                   Download All
-                </button> -->
-                <button
+                </a>
+                  <button
                   id="restart-button-phase2"
                   class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-2 px-4 rounded-md transition-colors duration-300"
                 >
@@ -215,26 +269,69 @@
         animatedPlans.classList.add("animate-slide-out-right");
         setTimeout(() => {
           animatedPlans.classList.add("hidden");
-        }, 500); // Match the duration of the slide-out animation
+        }, 500); 
         }
       });
       });
+
+      // Initial state: hide file input
+      const checkbox = document.getElementById('attach_template_checkbox');
+      const odtFileInput = document.getElementById('odt_file_input');
+
+      odtFileInput.style.display = 'none';
+      
+      checkbox.addEventListener('change', function () {
+        if (checkbox.checked) {
+          odtFileInput.style.display = 'block';
+        } else {
+          odtFileInput.style.display = 'none';
+        }
+      });
+
     </script>
   </div>
   <script>
+
     document.addEventListener("DOMContentLoaded", function () {
+      const cliContainer = document.getElementById('typingContainer');
+
+      //sockets
+      const socket = io('/phase2');
+      socket.on("connect", () => {
+        console.log("Connected to :", socket.id);
+      });
+
+      function joinRoom(roomId) {
+        socket.emit("join", { room: roomId });
+      }
+
+      function leaveRoom(roomId) {
+        socket.emit("leave", { room: roomId });
+      }
+
+      socket.on('message', (msg) => {
+        console.log('message :',msg)
+        addMessageContainer(cliContainer,msg['msg']);
+
+         // only touch the bar when progress is defined
+        if (msg.progress != null) {
+          console.log("setting progress to:", msg.progress);
+          progressIndicator.style.width = msg.progress;
+        }
+      });
+
+     
       // Elements
       const uploadArea = document.getElementById("upload-area-phase2");
       const uploadDefault = document.getElementById("upload-default-phase2");
+      const generateTemplateButton = document.getElementById("generate-template-phase2");
+
     
       const documentStructure = document.getElementById(
         "document-structure"
       );
   
-
-      const uploadProcessing = document.getElementById(
-        "upload-processing-phase2"
-      );
+      const progressStreamer = document.getElementById('progress-stream');
       const fileInput = document.getElementById("file-input-phase2");
       const browseButton = document.getElementById("browse-button-phase2");
       const progressIndicator = document.getElementById(
@@ -246,7 +343,18 @@
       const downloadAllButton = document.getElementById(
         "download-all-button-phase2"
       );
+
       const filename = document.getElementById("filename-phase2");
+
+
+      generateTemplateButton.addEventListener("click",async function(){
+        docx_file = fileInput.files[0];
+        odt_file = odtFileInput.files[0];
+
+
+        console.log('generate template button :', docx_file,odt_file);
+        await handleFile(docx_file, odt_file);
+      })
 
       // Drag and drop functionality
       uploadArea.addEventListener("dragover", function (e) {
@@ -262,23 +370,29 @@
       });
 
       uploadArea.addEventListener("drop",async function (e) {
+        console.log('dropped');
         e.preventDefault();
         uploadArea.classList.remove("border-blue-500", "bg-blue-100");
-        const files = e.dataTransfer.files;
-        await handleFile(files[0]);
+        
+        //attach file name 
+        fileNameNode =document.getElementById('fileNameP');
+        fileNameNode.textContent=e.target.files[0].name;
       });
 
       // Browse button functionality
       browseButton.addEventListener("click", function () {
+        fileInput.value = null; 
         fileInput.click();
       });
 
-      fileInput.addEventListener("change",async function () {
+
+      fileInput.addEventListener("change",async function (e) {
         console.log("fileInput change event is triggered !");
-        if (fileInput.files.length > 0) {
-          console.log('change event is triggered !');
-          await handleFile(fileInput.files[0]);
-        }
+        let files = Array.from(fileInput.files);
+
+        fileNameNode =document.getElementById('fileNameP');
+        fileNameNode.textContent=e.target.files[0].name;
+
       });
 
       // Restart button functionality
@@ -286,25 +400,43 @@
         showDefault();
       });
 
-      async function handleFile(file) {
-        console.log("called handleFile !");
-        if (file && file.name.endsWith(".docx")) {
+      async function handleFile(docx_file, odt_file) {
+        const checkbox = document.getElementById('attach_template_checkbox');
+
+        if(checkbox.checked && !odt_file) {
+          alert('add odt file template');
+          return ;
+        }
+
+        
+        if (docx_file && docx_file.name.endsWith(".docx")) {
 
           // Update UI for processing
           showLoading();
       
           // Set filename
-          filename.textContent = file.name;
+          filename.textContent = docx_file.name;
 
           //create a zip file 
           const zip = new JSZip();
-          if (file) zip.file(file.name, file);
+          if (docx_file) zip.file(docx_file.name, docx_file);
+          if(odt_file && checkbox.checked) zip.file(odt_file.name,odt_file);
+
+          // 1) Declare uploadId up here so it's visible in finally
+          let uploadId;
 
           try {
             // Generate the zip file
             const zipFile = await zip.generateAsync({ type: "blob" });
             // Create FormData and append file
             const formData = new FormData();
+
+            uploadId = createUUID();
+
+            formData.append("upload_id", uploadId);
+            
+            joinRoom(uploadId);
+
             formData.append("zip_file", zipFile);
     
             // Send request to upload endpoint with JWT token in headers
@@ -329,6 +461,10 @@
             const blob = await response.blob();
             const zipContent = await JSZip.loadAsync(blob);
 
+            //attach zip file to download all button 
+            const zip_file_url = URL.createObjectURL(blob);
+            downloadAllButton.href = zip_file_url;
+            
             for (const fileName in zipContent.files) {
               const file = zipContent.files[fileName];
               if (!file.dir) {
@@ -338,17 +474,20 @@
                 documentStructure.appendChild(docElement);
               }
             }
-            console.log("Document structure created:", documentStructure);
 
+            console.log("Document structure created:", documentStructure);
             // Show success UI
             showSuccess();
-
           } catch (error) {
             alert("An error occurred during upload");
-            // uploadDefault.classList.remove("hidden");
+
             showDefault();
-            // uploadProcessing.classList.add("hidden");
             console.error("Error during processing:", error);
+            
+          }finally{
+            console.log('upload id :', uploadId)
+            leaveRoom(uploadId);
+            removeMessageContainer(cliContainer);
           }
 
         } else {
@@ -356,7 +495,6 @@
           alert("Please upload a valid DOCX file.");
           // uploadDefault.classList.remove("hidden");
           showDefault();
-          
         }
       }
 
@@ -453,30 +591,107 @@
     function showSuccess(){
       uploadArea.classList.add("hidden");
       resultsArea.classList.remove("hidden");
-      uploadProcessing.classList.add("hidden");
       uploadDefault.classList.add("hidden");
-      
+      progressStreamer.classList.add("hidden");
     }
 
     function showLoading(){
-      uploadArea.classList.remove("hidden");
+      uploadArea.classList.add("hidden");
       resultsArea.classList.add("hidden");
       uploadDefault.classList.add("hidden");
-      uploadProcessing.classList.remove("hidden");
+      progressStreamer.classList.remove("hidden");
     }
 
     function showDefault(){
+
+      //remove all child of document structure
+      while (documentStructure.firstChild) {
+        documentStructure.removeChild(documentStructure.firstChild);
+      }
       uploadArea.classList.remove("hidden");
       resultsArea.classList.add("hidden");
       uploadDefault.classList.remove("hidden");
 
-      uploadProcessing.classList.add("hidden");
+
       fileInput.value = "";
       progressIndicator.style.width = "0%";
-      progressText.textContent = "0%";
       documentStructure.innerHTML = '';
       filename.textContent = ''; 
+
+      progressStreamer.classList.add("hidden");
     }
+
+    function createUUID() {
+        let dt = new Date().getTime();
+
+        const uuid = "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(
+          /[xy]/g,
+          function (c) {
+            const r = (dt + Math.random() * 16) % 16 | 0;
+            dt = Math.floor(dt / 16);
+            return (c == "x" ? r : (r & 0x3) | 0x8).toString(16);
+          }
+        );
+
+        return uuid;
+      }
     });
+
+    function addMessageContainer(typingContainer, messageText) {
+      // 1) Turn just the last spinner into a checkmark
+      const prev = typingContainer.lastElementChild;
+      if (prev) {
+        const loader = prev.querySelector('.loading-icon');
+        if (loader) {
+          loader.innerHTML = '✔️';
+          loader.classList.replace('loading-icon', 'checkmark-icon');
+        }
+        const oldP = prev.querySelector('p');
+        if (oldP) {
+          oldP.style.animation = 'none';
+        }
+      }
+
+      // 2) Create the new “typing” bubble
+      const wrapper = document.createElement('div');
+      wrapper.className = 'flex items-start space-x-3 message-item';
+
+
+      const icon = document.createElement('span');
+      icon.className = 'text-green-500 loading-icon';
+      icon.innerHTML = `
+        <svg aria-hidden="true" class="inline w-4 h-4 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="currentColor"/>
+                        <path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="currentFill"/>
+                    </svg>
+      `;
+
+      const txt = document.createElement('p');
+      txt.className = 'typing-text-1 text-white text-left whitespace-pre-wrap break-words';
+      txt.style.opacity    = 1;
+      txt.style.animation  = '2s steps(40) 0s 1 normal forwards typing, 0.75s step-end 0s infinite blink';
+      txt.innerHTML = messageText.replace(/\n/g, '<br>');  // only this!
+
+      wrapper.appendChild(icon);
+      wrapper.appendChild(txt);
+
+      // 3) Append it
+      typingContainer.appendChild(wrapper);
+      
+      // ← scroll to bottom:
+      typingContainer.scrollTo({
+        top: typingContainer.scrollHeight,
+        behavior: 'smooth'
+      });
+    }
+
+
+    function removeMessageContainer(typingContainer){
+      // Remove all children of the typingContainer
+      while (typingContainer.firstChild) {
+        typingContainer.removeChild(typingContainer.firstChild);
+      }
+    }
+
   </script>
 </section>

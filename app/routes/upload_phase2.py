@@ -10,10 +10,11 @@ from zipfile import ZipFile
 import os
 
 from .modules.phase2.main import process_document
-import os
 
 
 def upload_phase2():
+    from app import socketio
+    input_folder = None
     # First verify the user isauthenticated
     try:
         verify_jwt_in_request()
@@ -23,6 +24,8 @@ def upload_phase2():
 
     # Expecting a .zip file
     zip_file = request.files.get('zip_file')
+    upload_id = request.form['upload_id']
+    print('upload id is :', upload_id)
 
     if not zip_file:
         print("Missing zip file!")
@@ -34,12 +37,18 @@ def upload_phase2():
 
         with zipfile.ZipFile(zip_buffer, 'r') as z:
             word_file = None
+            odt_file = None
 
             # Loop through the files inside the zip and find the Word file
             for file_name in z.namelist():
+                print('file name : ', file_name)
                 if file_name.endswith('.docx') or file_name.endswith('.doc'):
                     word_file = io.BytesIO(z.read(file_name))
                     word_file_name = file_name  # Save the file name
+
+                if file_name.endswith('.dotx'):
+                    odt_file = io.BytesIO(z.read(file_name))
+                    odt_file_name = file_name  # Save the file name
 
             # Check if the Word file was found
             if not word_file:
@@ -58,12 +67,28 @@ def upload_phase2():
             # Save the Word file to the 'input' folder
             docx_path = os.path.join(input_folder, word_file_name)
 
+            odt_path = os.path.join(
+                input_folder, odt_file_name) if odt_file else None
+
+            socketio.emit(
+                'message', {'msg': 'word file is uploaded', 'progress': '5%'}, room=upload_id, namespace='/phase2')
+
             with open(docx_path, 'wb') as f:
                 f.write(word_file.getbuffer())
                 print('Saved input Word file:', docx_path)
 
+            if (odt_file):
+                with open(odt_path, 'wb') as f:
+                    f.write(odt_file.getbuffer())
+                    print('Saved input odt file:', odt_path)
+
             # Process the document
-            document_paths = process_document(docx_path)
+            document_paths = process_document(
+                docx_path, upload_id=upload_id, dotx_path=odt_path)
+
+            socketio.emit(
+                'message', {'msg': 'Send outputs file', 'progress': '100%'}, room=upload_id, namespace='/phase2')
+
             stream = BytesIO()
             with ZipFile(stream, 'w') as zf:
                 for path in document_paths:
