@@ -3,12 +3,6 @@ import os
 import urllib.parse
 import pythoncom
 import win32com.client
-
-
-import os
-import urllib.parse
-import pythoncom
-import win32com.client
 import time
 
 

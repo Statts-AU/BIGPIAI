@@ -1,37 +1,8 @@
 
 import PyPDF2
-# import pymupdf4llm
 
 
-def normalize_for_comparison(text):
-    """Normalize text for comparison by standardizing hyphens and spaces"""
-    # Replace all types of hyphens/dashes with standard hyphen
-    replacements = {
-        '\u2013': '-',  # en dash (–)
-        '\u2014': '-',  # em dash (—)
-        '\u2010': '-',  # hyphen
-        '\u2011': '-',  # non-breaking hyphen
-        '\u2012': '-',  # figure dash
-        '\u2015': '-',  # horizontal bar
-        '\u2212': '-',  # minus sign
-    }
 
-    for unicode_dash, replacement in replacements.items():
-        text = text.replace(unicode_dash, replacement)
-
-
-# def read_pdf(pdf_file):
-#     pdf_reader = PyPDF2.PdfReader(pdf_file)
-#     total_pages = len(pdf_reader.pages)
-
-#     page_contents = []
-#     for page_num in range(total_pages):
-#         page = pdf_reader.pages[page_num]
-#         text = page.extract_text()
-#         page_content = {"page": page_num, "text": text}
-#         page_contents.append(page_content)
-
-#     return page_contents
 
 def read_pdf(pdf_file):
 

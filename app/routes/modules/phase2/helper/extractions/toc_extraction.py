@@ -14,7 +14,7 @@ def import_custom():
     from normalize import (
         format_content_for_toc_endpage_extraction,
         read_pdf,
-        normalize_for_comparison,
+        
         format_toc_page_for_extraction,
         format_non_toc_page_for_extraction
     )
@@ -22,7 +22,6 @@ def import_custom():
         client,
         format_content_for_toc_endpage_extraction,
         read_pdf,
-        normalize_for_comparison,
         format_toc_page_for_extraction,
         format_non_toc_page_for_extraction
     )
@@ -31,7 +30,6 @@ def import_custom():
 client, \
     format_content_for_toc_endpage_extraction, \
     read_pdf, \
-    normalize_for_comparison, \
     format_toc_page_for_extraction, \
     format_non_toc_page_for_extraction = import_custom()
 

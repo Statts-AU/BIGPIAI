@@ -2,7 +2,6 @@ import re
 from ..models import TocEntries
 from ..openai_client import client
 import os
-from .extract_toc_endpage import extract_toc_endpage
 from ..normalize import format_toccontent_for_tocpage
 
 from thefuzz import fuzz

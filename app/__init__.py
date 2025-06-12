@@ -14,7 +14,7 @@ socketio = SocketIO(cors_allowed_origins="*")
 
 def create_app():
     app = Flask(__name__)
-    CORS(app)  # Enable CORS for all routes
+    CORS(app, supports_credentials=True )  # Enable CORS for all routes
 
     # Add these two lines to set the secret keys
     # Required for sessions/flash messages
@@ -24,6 +24,7 @@ def create_app():
 
     # Other JWT configurations
     app.config['JWT_TOKEN_LOCATION'] = ['cookies']
+    app.config['JWT_COOKIE_SECURE'] = False
     app.config['JWT_COOKIE_CSRF_PROTECT'] = False  # For simplicity
     JWTManager(app)  # Initialize JWTManager with your app
 
