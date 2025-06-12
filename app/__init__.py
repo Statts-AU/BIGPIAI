@@ -6,7 +6,10 @@ from .routes.upload_phase1 import upload_phase1
 from .routes.home import home  # Import your home route
 from .routes.login import login  # Import your login route
 from .routes.logout import logout  # Import your logout route
+from flask_socketio import SocketIO
+from .routes.socket_manager import createSocketManager
 
+socketio = SocketIO(cors_allowed_origins="*")
 
 
 def create_app():
@@ -34,6 +37,8 @@ def create_app():
                      methods=['GET', 'POST'])  # Add the login route
     app.add_url_rule('/logout', view_func=logout)  # Add the logout route
 
+    createSocketManager(socketio=socketio)
+    socketio.init_app(app)
     return app
 
 
