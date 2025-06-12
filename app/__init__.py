@@ -9,12 +9,12 @@ from .routes.logout import logout  # Import your logout route
 from flask_socketio import SocketIO
 from .routes.socket_manager import createSocketManager
 
-socketio = SocketIO(cors_allowed_origins="*")
+socketio = SocketIO(async_mode='eventlet', cors_allowed_origins="*")
 
 
 def create_app():
     app = Flask(__name__)
-    CORS(app, supports_credentials=True )  # Enable CORS for all routes
+    CORS(app, supports_credentials=True)  # Enable CORS for all routes
 
     # Add these two lines to set the secret keys
     # Required for sessions/flash messages
