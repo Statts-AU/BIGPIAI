@@ -10,8 +10,10 @@ from flask_socketio import SocketIO
 from .routes.socket_manager import createSocketManager
 
 
-socketio = SocketIO(async_mode='eventlet', ping_interval=20,
-                    ping_timeout=20, cors_allowed_origins="*")
+socketio = SocketIO(async_mode='eventlet', 
+                    ping_interval=60000,   
+                    ping_timeout=60000,   
+                    cors_allowed_origins="*")
 
 def create_app():
     app = Flask(__name__)
