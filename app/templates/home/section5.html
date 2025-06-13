@@ -296,7 +296,10 @@
       const cliContainer = document.getElementById('typingContainer');
 
       //sockets
-      const socket = io('/phase2');
+      const socket = io('/phase2',{
+        transports: ['websocket'],
+        upgrade: false             
+      });
       socket.on("connect", () => {
         console.log("Connected to :", socket.id);
       });

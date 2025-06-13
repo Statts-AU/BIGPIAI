@@ -348,7 +348,10 @@
       const progressIndicator = document.getElementById("progress-indicator");
       const progressText = document.getElementById("progress-text");
 
-      const socket = io("/phase1");
+      const socket = io("/phase1", {
+        transports: ["websocket"],
+        upgrade: false,
+      });
 
       socket.on("connect", () => {
         console.log("Connected to :", socket.id);

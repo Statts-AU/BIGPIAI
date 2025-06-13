@@ -9,11 +9,13 @@ from .routes.logout import logout  # Import your logout route
 from flask_socketio import SocketIO
 from .routes.socket_manager import createSocketManager
 
-socketio = SocketIO(async_mode='eventlet', cors_allowed_origins="*")
 
+socketio = SocketIO(async_mode='eventlet', ping_interval=20,
+                    ping_timeout=20, cors_allowed_origins="*")
 
 def create_app():
     app = Flask(__name__)
+    
     CORS(app, supports_credentials=True)  # Enable CORS for all routes
 
     # Add these two lines to set the secret keys
@@ -42,5 +44,3 @@ def create_app():
     socketio.init_app(app)
     return app
 
-
-app = create_app()
