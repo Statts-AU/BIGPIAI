@@ -14,16 +14,14 @@ def import_custom():
     from normalize import (
         format_content_for_toc_endpage_extraction,
         read_pdf,
-        normalize_for_comparison,
+        
         format_toc_page_for_extraction,
         format_non_toc_page_for_extraction
     )
-
     return (
         client,
         format_content_for_toc_endpage_extraction,
         read_pdf,
-        normalize_for_comparison,
         format_toc_page_for_extraction,
         format_non_toc_page_for_extraction
     )
@@ -32,13 +30,14 @@ def import_custom():
 client, \
     format_content_for_toc_endpage_extraction, \
     read_pdf, \
-    normalize_for_comparison, \
     format_toc_page_for_extraction, \
     format_non_toc_page_for_extraction = import_custom()
 
 
 def extract_toc_from_toc_page(page_contents):
     toc_end_page = extract_toc_endpage(page_contents)
+
+    print(f"TOC ends on page: {toc_end_page}")
     toc_text = format_toc_page_for_extraction(
         page_contents, toc_end_page)
 
@@ -65,7 +64,7 @@ def extract_toc_from_toc_page(page_contents):
         ]
 
     except Exception as e:
-        print(f"⚠️ Error extracting TOC with GPT: {e}")
+        print(f"⚠️ Error extracting TOC from the toc page{e}")
         raise Exception(
             f"Error extracting TOC with GPT: {e}. Please check the PDF content and try again.")
 
@@ -97,7 +96,7 @@ def extract_toc_from_nontoc_content(page_contents):
         ]
 
     except Exception as e:
-        print(f"⚠️ Error extracting TOC with GPT: {e}")
+        print(f"⚠️ Error extracting TOC from the non toc content {e}")
         raise Exception(
             f"Error extracting TOC with GPT: {e}. Please check the PDF content and try again."
         )
@@ -109,12 +108,6 @@ if __name__ == "__main__":
     pdf_file = os.path.abspath(pdf_file)
     print("path for pdf file is : ", pdf_file)
     page_contents = read_pdf(pdf_file)
-
-    # toc_end_page = extract_toc_endpage(page_contents)
-    # print(f"toc_end_page : {toc_end_page}")
-    # toc_entries = extract_toc_from_toc_page(page_contents)
-    # print(f"from the toc page : ")
-    # print(toc_entries)
 
     toc_entries_nontoc = extract_toc_from_nontoc_content(
         page_contents)

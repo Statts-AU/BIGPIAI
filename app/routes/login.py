@@ -1,6 +1,6 @@
 from flask import request, render_template, redirect, url_for, flash
 from flask_jwt_extended import create_access_token
-from ..user_data import users  # Import the users list
+from ..user_data import users  
 
 
 def login():
@@ -10,6 +10,7 @@ def login():
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
+        print(username, password)
 
         if not username or not password:
             flash('Username and password are required')

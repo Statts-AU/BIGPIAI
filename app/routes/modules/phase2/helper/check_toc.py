@@ -1,7 +1,7 @@
 
-import os
+
 from openai_client import client
-from normalize import format_content_for_toc_check, read_pdf
+from normalize import format_content_for_toc_check
 
 
 def check_toc_in_pdf(pdf_content):

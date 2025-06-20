@@ -6,16 +6,19 @@ from .routes.upload_phase1 import upload_phase1
 from .routes.home import home  # Import your home route
 from .routes.login import login  # Import your login route
 from .routes.logout import logout  # Import your logout route
+from flask_socketio import SocketIO
+from .routes.socket_manager import createSocketManager
 
 
+socketio = SocketIO(async_mode='eventlet', 
+                    ping_interval=60000,   
+                    ping_timeout=60000,   
+                    cors_allowed_origins="*")
 
 def create_app():
-
     app = Flask(__name__)
-
-
-
-    CORS(app)  # Enable CORS for all routes
+    
+    CORS(app, supports_credentials=True)  # Enable CORS for all routes
 
     # Add these two lines to set the secret keys
     # Required for sessions/flash messages
@@ -25,6 +28,7 @@ def create_app():
 
     # Other JWT configurations
     app.config['JWT_TOKEN_LOCATION'] = ['cookies']
+    app.config['JWT_COOKIE_SECURE'] = False
     app.config['JWT_COOKIE_CSRF_PROTECT'] = False  # For simplicity
     JWTManager(app)  # Initialize JWTManager with your app
 
@@ -38,4 +42,7 @@ def create_app():
                      methods=['GET', 'POST'])  # Add the login route
     app.add_url_rule('/logout', view_func=logout)  # Add the logout route
 
+    createSocketManager(socketio=socketio)
+    socketio.init_app(app)
     return app
+

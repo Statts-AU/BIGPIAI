@@ -284,7 +284,7 @@
                   Successful!
                 </p>
 
-                <!-- New Upload Button -->
+                <!-- New Upload Button & Download button-->
                 <div>
                   <a id="download-a-phase1">
                     <button
@@ -345,6 +345,36 @@
   </div>
   <script>
     document.addEventListener("DOMContentLoaded", function () {
+      const progressIndicator = document.getElementById("progress-indicator");
+      const progressText = document.getElementById("progress-text");
+
+      const socket = io("/phase1", {
+        transports: ["websocket"],
+        upgrade: false,
+      });
+
+      socket.on("connect", () => {
+        console.log("Connected to :", socket.id);
+      });
+
+      socket.on("message", (msg) => {
+        console.log("message :", msg);
+
+        if (msg != null) {
+          console.log("setting progress to:", msg.progress);
+          progressIndicator.style.width = msg.progress;
+          progressText.textContent = msg.msg;
+        }
+      });
+
+      function joinRoom(roomId) {
+        socket.emit("join", { room: roomId });
+      }
+
+      function leaveRoom(roomId) {
+        socket.emit("leave", { room: roomId });
+      }
+
       // Elements
       const uploadArea = document.getElementById("upload-area-phase1");
       const fileInput1 = document.getElementById("file-input-phase1");
@@ -361,8 +391,6 @@
         "new-upload-button-phase1"
       );
       const downloadA = document.getElementById("download-a-phase1");
-      const progressIndicator = document.getElementById("progress-indicator");
-      const progressText = document.getElementById("progress-text");
 
       let fileWord = null;
       let fileTemplate = null;
@@ -387,7 +415,7 @@
 
       uploadArea.addEventListener("dragleave", function (e) {
         e.preventDefault();
-        
+
         uploadArea.classList.remove("border-blue-500");
         uploadArea.classList.remove("bg-blue-100");
       });
@@ -428,6 +456,8 @@
         if (fileWord) zip.file("word_file.docx", fileWord);
         if (fileTemplate) zip.file("excel_file.xlsx", fileTemplate);
 
+        const uploadId = createUUID();
+        joinRoom(uploadId);
         fileDropArea.classList.add("hidden");
         uploadProcessing.classList.remove("hidden");
         // Generate the zip file
@@ -435,9 +465,9 @@
 
         // Create a new FormData and append the compressed zip file
         const formData = new FormData();
-        const uploadId = createUUID();
-        formData.append("zip_file", zipFile, "files.zip");
+
         formData.append("upload_id", uploadId);
+        formData.append("zip_file", zipFile, "files.zip");
 
         fetch("/upload-phase1", {
           method: "POST",
@@ -481,10 +511,15 @@
             console.log(error);
             uploadProcessing.classList.add("hidden");
             uploadArea.classList.remove("hidden");
+          })
+          .finally(() => {
+            console.log("upload id :", uploadId);
+            leaveRoom(uploadId);
+            progressIndicator.style.width = "0%";
+            progressText.textContent = "";
           });
       }
 
-      function simulateProcessing() {}
       function createUUID() {
         let dt = new Date().getTime();
 

@@ -56,3 +56,5 @@ Thumbs.db
 
 # Git
 .git/
+Dockerfile
+.github
