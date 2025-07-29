@@ -8,12 +8,31 @@ from .routes.login import login  # Import your login route
 from .routes.logout import logout  # Import your logout route
 from flask_socketio import SocketIO
 from .routes.socket_manager import createSocketManager
+import os
+from dotenv import load_dotenv
 
+import os
+from dotenv import load_dotenv
 
-socketio = SocketIO(async_mode='eventlet', 
-                    ping_interval=60000,   
-                    ping_timeout=60000,   
-                    cors_allowed_origins="*")
+# Load environment variables
+load_dotenv()
+
+# Configure SocketIO based on environment
+is_production = os.getenv('PRODUCTION', 'false').lower() == 'true'
+use_waitress = os.getenv('USE_WAITRESS', 'false').lower() == 'true'
+
+if use_waitress:
+    # For Waitress deployment - use threading mode
+    socketio = SocketIO(async_mode='threading', 
+                        ping_interval=60000,   
+                        ping_timeout=60000,   
+                        cors_allowed_origins="*")
+else:
+    # For eventlet deployment (recommended)
+    socketio = SocketIO(async_mode='eventlet', 
+                        ping_interval=60000,   
+                        ping_timeout=60000,   
+                        cors_allowed_origins="*")
 
 def create_app():
     app = Flask(__name__)
@@ -22,9 +41,9 @@ def create_app():
 
     # Add these two lines to set the secret keys
     # Required for sessions/flash messages
-    app.secret_key = 'dev-secret-key-change-in-production'
+    app.secret_key = os.getenv('SECRET_KEY', 'dev-secret-key-change-in-production')
     # For JWT tokens
-    app.config['JWT_SECRET_KEY'] = 'jwt-secret-key-change-in-production'
+    app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY', 'jwt-secret-key-change-in-production')
 
     # Other JWT configurations
     app.config['JWT_TOKEN_LOCATION'] = ['cookies']
