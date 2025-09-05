@@ -13,11 +13,34 @@ sys.path.insert(0, str(project_root))
 
 def setup_production_environment():
     """Set up environment variables for production."""
+    # Load production environment file first
+    from dotenv import load_dotenv
+    
+    # Try to load .env.production first, then fall back to .env
+    env_files = ['.env.production', '.env']
+    env_loaded = False
+    
+    for env_file in env_files:
+        if Path(env_file).exists():
+            load_dotenv(env_file, override=True)
+            print(f"✓ Loaded environment from: {env_file}")
+            env_loaded = True
+            break
+    
+    if not env_loaded:
+        print("⚠️  No environment file found, using defaults")
+    
+    # Set production defaults
     os.environ.setdefault('FLASK_APP', 'run.py')
     os.environ.setdefault('FLASK_ENV', 'production')
     os.environ.setdefault('FLASK_DEBUG', '0')
     os.environ.setdefault('PRODUCTION', 'true')
     os.environ.setdefault('USE_WAITRESS', 'true')
+    
+    # Windows VM specific defaults
+    os.environ.setdefault('HOST', '0.0.0.0')
+    os.environ.setdefault('PORT', '80')
+    os.environ.setdefault('WORKERS', '4')
     
     # Create necessary directories
     directories = [
@@ -174,6 +197,10 @@ def run_with_waitress(app, host, port):
         from waitress import serve
         print(f"🚀 Starting Waitress production server...")
         print(f"📍 Server will be available at: http://{host}:{port}")
+        if port == 80:
+            print(f"🌐 External access: http://4.147.177.22")
+        else:
+            print(f"🌐 External access: http://4.147.177.22:{port}")
         print(f"🔒 Production mode enabled")
         print(f"⚠️  Press Ctrl+C to stop the server")
         print("=" * 50)
@@ -182,6 +209,19 @@ def run_with_waitress(app, host, port):
         
     except ImportError:
         print("❌ Waitress not installed. Install with: pip install waitress")
+        return False
+    except PermissionError:
+        print(f"❌ Permission denied to bind to port {port}")
+        if port == 80:
+            print("💡 Port 80 requires administrator privileges on Windows")
+            print("💡 Try running as administrator or use a different port (e.g., 8080)")
+        return False
+    except OSError as e:
+        if "Address already in use" in str(e):
+            print(f"❌ Port {port} is already in use")
+            print("💡 Try stopping other services or use a different port")
+        else:
+            print(f"❌ Network error: {e}")
         return False
     except Exception as e:
         print(f"❌ Error starting Waitress server: {e}")
