@@ -149,6 +149,11 @@ BIGPIAI/
 
 ## Testing
 
+Test environment configuration:
+```bash
+python test_env.py
+```
+
 Test AI integration:
 ```bash
 python test_ai.py
