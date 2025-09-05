@@ -11,7 +11,7 @@ except ImportError:
     DocxDocument = None
     PYTHON_DOCX_AVAILABLE = False
 
-from cv_processor.editor.base_editor import BaseDocxEditor
+from app.cv_processor.editor.base_editor import BaseDocxEditor
 
 
 class PythonDocxEditor(BaseDocxEditor):

@@ -66,6 +66,10 @@ LOG_FILE=logs/bigpiai.log
 
 5. Run the development server:
 ```bash
+# Using the startup script (recommended)
+./start.sh dev
+
+# Or directly
 python run_local.py
 ```
 
@@ -88,11 +92,17 @@ pip install waitress gunicorn
 
 3. Run with production server:
 ```bash
-# Using Waitress
-waitress-serve --host=0.0.0.0 --port=5000 app:create_app
+# Using the startup script (recommended)
+./start.sh prod
 
-# Or using Gunicorn
-gunicorn --bind 0.0.0.0:5000 --workers 4 "app:create_app()"
+# Or using the production script directly
+python run_production.py
+
+# Or manually with Waitress
+waitress-serve --host=0.0.0.0 --port=5000 run:app
+
+# Or manually with Gunicorn
+gunicorn --bind 0.0.0.0:5000 --workers 4 run:app
 ```
 
 ## Project Structure
@@ -116,7 +126,11 @@ BIGPIAI/
 ├── .env.example                 # Environment template
 ├── requirements.txt             # Python dependencies
 ├── run_local.py                 # Development server
-└── test_ai.py                   # AI integration tests
+├── run_production.py            # Production server
+├── run.py                       # WSGI entry point
+├── start.sh                     # Startup script
+├── test_ai.py                   # AI integration tests
+└── test_env.py                  # Environment validation
 ```
 
 ## API Endpoints
@@ -151,6 +165,10 @@ BIGPIAI/
 
 Test environment configuration:
 ```bash
+# Using the startup script
+./start.sh test
+
+# Or directly
 python test_env.py
 ```
 
