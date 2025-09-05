@@ -104,6 +104,54 @@ def check_dependencies():
     print(f"\n✓ All required packages are installed")
     return True
 
+def check_environment_variables():
+    """Check if environment variables are properly set."""
+    from dotenv import load_dotenv
+    load_dotenv()
+    
+    print("\n📋 Checking environment variables...")
+    
+    # Check if .env file exists
+    env_file = Path('.env')
+    if not env_file.exists():
+        print("⚠️  .env file not found. Creating from .env.example...")
+        example_file = Path('.env.example')
+        if example_file.exists():
+            import shutil
+            shutil.copy('.env.example', '.env')
+            print("✓ Created .env file from .env.example")
+            print("💡 Please edit .env file with your API keys")
+        else:
+            print("❌ .env.example file not found")
+            return False
+    
+    # Check critical environment variables
+    required_vars = ['SECRET_KEY', 'JWT_SECRET_KEY']
+    optional_vars = ['OPENAI_API_KEY', 'GEMINI_API_KEY']
+    
+    for var in required_vars:
+        value = os.getenv(var, '')
+        if value and not value.startswith('your-') and not value.startswith('dev-'):
+            print(f"✓ {var} - SET")
+        else:
+            print(f"⚠️  {var} - USING DEFAULT/PLACEHOLDER")
+    
+    missing_optional = []
+    for var in optional_vars:
+        value = os.getenv(var, '')
+        if value and not value.startswith('your-') and value != 'placeholder-key':
+            print(f"✓ {var} - SET")
+        else:
+            print(f"⚠️  {var} - NOT SET (Some features may not work)")
+            missing_optional.append(var)
+    
+    if missing_optional:
+        print(f"\n💡 To enable all features, set these variables in your .env file:")
+        for var in missing_optional:
+            print(f"   - {var}")
+    
+    return True
+
 def main():
     """Main function to run the local development server."""
     print("🚀 Starting BIGPIAI Local Development Server")
@@ -112,6 +160,9 @@ def main():
     # Setup environment
     print("📁 Setting up environment...")
     setup_environment()
+    
+    # Check environment variables first
+    check_environment_variables()
     
     # Check dependencies
     print("\n📦 Checking dependencies...")
