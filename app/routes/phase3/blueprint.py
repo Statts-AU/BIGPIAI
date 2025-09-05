@@ -33,7 +33,7 @@ try:
     if str(project_root) not in sys.path:
         sys.path.insert(0, str(project_root))
     
-    from cv_processor.utils.ai_client import get_ai_client
+    from app.cv_processor.utils.ai_client import get_ai_client
     CV_PROCESSOR_AVAILABLE = True
     print("✓ CV Processor modules loaded successfully")
 except ImportError as e:

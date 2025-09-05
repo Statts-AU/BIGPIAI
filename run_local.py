@@ -37,9 +37,7 @@ def check_dependencies():
         ('flask', 'Flask'),
         ('flask_cors', 'CORS'),
         ('flask_jwt_extended', 'JWTManager'),
-        ('flask_socketio', 'SocketIO'),
         ('docx', 'Document'),
-        ('eventlet', None),
         ('dotenv', 'load_dotenv')
     ]
     

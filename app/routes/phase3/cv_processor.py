@@ -15,12 +15,12 @@ if str(project_root) not in sys.path:
     sys.path.insert(0, str(project_root))
 
 try:
-    from cv_processor.analysis.placeholder_mapper import (
+    from app.cv_processor.analysis.placeholder_mapper import (
         extract_jinja_placeholders,
         map_jinja_placeholders_to_values
     )
-    from cv_processor.analysis.cv_parser import extract_raw_cv_text, _read_docx_full_text, convert_pdf_to_docx
-    from cv_processor.analysis.template_analyzer import read_template_full_text
+    from app.cv_processor.analysis.cv_parser import extract_raw_cv_text, _read_docx_full_text, convert_pdf_to_docx
+    from app.cv_processor.analysis.template_analyzer import read_template_full_text
     CV_PROCESSOR_AVAILABLE = True
     print("✓ CV Processor modules loaded successfully")
 except ImportError as e:

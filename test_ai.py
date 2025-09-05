@@ -14,11 +14,11 @@ def test_gemini_api():
     """Test Gemini API integration"""
     try:
         # Load environment variables
-        from cv_processor.utils.env_utils import load_env_from_file
+        from app.cv_processor.utils.env_utils import load_env_from_file
         load_env_from_file()
         
         # Test AI client
-        from cv_processor.utils.ai_client import get_ai_client
+        from app.cv_processor.utils.ai_client import get_ai_client
         
         print("🔧 Testing Gemini API integration...")
         print(f"GEMINI_API_KEY set: {'✓' if os.getenv('GEMINI_API_KEY') else '✗'}")
@@ -47,12 +47,12 @@ def test_cv_processor_imports():
     try:
         print("\n🔧 Testing CV processor imports...")
         
-        from cv_processor.analysis.placeholder_mapper import (
+        from app.cv_processor.analysis.placeholder_mapper import (
             extract_jinja_placeholders,
             map_jinja_placeholders_to_values
         )
-        from cv_processor.analysis.cv_parser import extract_raw_cv_text
-        from cv_processor.analysis.template_analyzer import read_template_full_text
+        from app.cv_processor.analysis.cv_parser import extract_raw_cv_text
+        from app.cv_processor.analysis.template_analyzer import read_template_full_text
         
         print("✓ All CV processor modules imported successfully")
         return True
@@ -66,7 +66,7 @@ def test_placeholder_extraction():
     try:
         print("\n🔧 Testing placeholder extraction...")
         
-        from cv_processor.analysis.placeholder_mapper import extract_jinja_placeholders
+        from app.cv_processor.analysis.placeholder_mapper import extract_jinja_placeholders
         
         # Test template with Jinja placeholders
         test_template = """
@@ -90,7 +90,7 @@ def test_ai_mapping():
     try:
         print("\n🔧 Testing AI placeholder mapping...")
         
-        from cv_processor.analysis.placeholder_mapper import map_jinja_placeholders_to_values
+        from app.cv_processor.analysis.placeholder_mapper import map_jinja_placeholders_to_values
         
         # Test data
         placeholders = ['name', 'email', 'experience']

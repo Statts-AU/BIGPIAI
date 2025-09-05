@@ -1,53 +1,22 @@
-# BIGPIAI - AI-Powered Document Processing Platform
+# BIGPIAI
 
-BIGPIAI is a comprehensive AI-powered platform for document processing, CV analysis, and template generation. The platform offers multiple phases of document processing capabilities, from basic analysis to advanced template-based generation.
+AI-powered document processing platform with three integrated phases for comprehensive document workflow automation.
 
 ## Features
 
-### Phase 1: AI-Powered Writing Plan Generation
-- Structured writing plan creation from documents
-- Smart key point extraction using NLP
-- Customizable templates for different document types
-- Excel format output for easy editing
+- **Phase 1**: Writing Plan Creation - Generate structured writing plans from documents
+- **Phase 2**: Template Generation - Create customizable templates with AI-powered content extraction
+- **Phase 3**: CV Processing - Automated CV template processing with Jinja2 placeholder mapping
 
-### Phase 2: Advanced AI Template & Content Generation
-- Beyond planning - automated content structuring
-- Enhanced document analysis and generation
-- Custom framework creation
-- Professional template generation
+## Requirements
 
-### Phase 3: CV Template Processing & Generation
-- Upload custom Word templates with Jinja placeholders
-- Batch CV processing (PDF/DOCX support)
-- AI-powered content extraction and mapping
-- Real-time progress tracking
-- Instant download of processed documents
-- Professional formatting and layout optimization
+- Python 3.8+
+- Flask web framework
+- AI API keys (OpenAI for Phase 1&2, Gemini for Phase 3)
 
-## Technology Stack
+## Installation
 
-- **Backend**: Flask (Python)
-- **Frontend**: HTML, CSS, JavaScript, Tailwind CSS
-- **AI Integration**: OpenAI API, Google Gemini API
-- **Document Processing**: python-docx, PyPDF2, docxtpl, pdf2docx
-- **Real-time Communication**: Flask-SocketIO
-- **Authentication**: Flask-JWT-Extended
-
-## Quick Start
-
-### Option 1: One-Command Setup (Recommended)
-```bash
-python quick_start.py
-```
-This script will:
-- Check Python version
-- Create virtual environment
-- Install dependencies
-- Set up directories
-- Create configuration files
-- Start the application
-
-### Option 2: Manual Setup
+### Local Development
 
 1. Clone the repository:
 ```bash
@@ -55,227 +24,155 @@ git clone <repository-url>
 cd BIGPIAI
 ```
 
-2. Create a virtual environment:
-```bash
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-```
-
-3. Install dependencies:
+2. Install dependencies:
 ```bash
 pip install -r requirements.txt
 ```
 
-4. Set up environment variables:
+3. Set up environment variables:
 ```bash
 cp .env.example .env
-# Edit .env with your configuration
 ```
 
-## Running the Application
-
-### Local Development
-```bash
-# Option 1: Use the development runner
-python run_local.py
-
-# Option 2: Use the batch file (Windows)
-run_local.bat
-
-# Option 3: Direct Flask run
-python run.py
-```
-
-### Production Deployment
-
-#### Single VM Deployment (Linux)
-```bash
-# Make script executable
-chmod +x deploy_vm.sh
-
-# Deploy with default settings (port 80)
-sudo ./deploy_vm.sh
-
-# Deploy on custom port
-PORT=8080 ./deploy_vm.sh
-```
-
-#### Manual Production Deployment
-```bash
-# Option 1: Interactive deployment menu
-python deploy_production.py
-
-# Option 2: Direct gunicorn (recommended)
-gunicorn --worker-class eventlet -w 1 --bind 0.0.0.0:80 run:app
-```
-
-## Configuration
-
-### Environment Variables
-
-Create a `.env` file with the following variables:
-
+4. Configure your `.env` file:
 ```env
 # Flask Configuration
 SECRET_KEY=your-secret-key-change-in-production
 JWT_SECRET_KEY=your-jwt-secret-key-change-in-production
 FLASK_ENV=development
+FLASK_DEBUG=1
 
 # Production Settings
 PRODUCTION=false
 USE_WAITRESS=false
 
-# AI Configuration (Required for Phase 3)
+# AI Configuration
+OPENAI_API_KEY=your-openai-api-key-here
 GEMINI_API_KEY=your-gemini-api-key-here
+
+# File Upload Settings
+MAX_CONTENT_LENGTH=16777216
+UPLOAD_FOLDER=uploads
+OUTPUT_FOLDER=outputs
 
 # Server Configuration
 HOST=0.0.0.0
 PORT=5000
+
+# Logging
+LOG_LEVEL=INFO
+LOG_FILE=logs/bigpiai.log
 ```
 
-### Required API Keys
+5. Run the development server:
+```bash
+python run_local.py
+```
 
-- **Gemini API Key**: Required for Phase 3 CV processing
-  - Get your key from: https://makersuite.google.com/app/apikey
-  - Add to `.env` file as `GEMINI_API_KEY=your-key-here`
+The application will be available at `http://localhost:5000`
 
-## Usage
+### Production Deployment
 
-1. Start the application using one of the run methods above
-2. Navigate to `http://localhost:5000` (or your configured port)
-3. Choose your processing phase:
-   - **Phase 1**: Document analysis and writing plan generation
-   - **Phase 2**: Advanced template and content generation
-   - **Phase 3**: CV template processing with custom templates
-4. Upload your documents
-5. Monitor processing progress
-6. Download the processed results
+1. Set production environment variables:
+```env
+PRODUCTION=true
+USE_WAITRESS=true
+FLASK_ENV=production
+FLASK_DEBUG=0
+```
 
-## API Endpoints
+2. Install production dependencies:
+```bash
+pip install waitress gunicorn
+```
 
-### Phase 1 & 2
-- `POST /upload-phase1` - Phase 1 document processing
-- `POST /upload-phase2` - Phase 2 advanced processing
+3. Run with production server:
+```bash
+# Using Waitress
+waitress-serve --host=0.0.0.0 --port=5000 app:create_app
 
-### Phase 3 (CV Processing)
-- `POST /phase3/process` - Process CV files with template
-- `GET /phase3/download/<file_id>` - Download processed document
-- `GET /phase3/status/<session_id>` - Check processing status
+# Or using Gunicorn
+gunicorn --bind 0.0.0.0:5000 --workers 4 "app:create_app()"
+```
 
-### General
-- `GET /` - Main application interface
-- `POST /login` - User authentication
-- `GET /logout` - User logout
-
-## File Structure
+## Project Structure
 
 ```
 BIGPIAI/
 ├── app/
-│   ├── templates/
-│   │   └── home/
-│   │       ├── sectionphase1.html
-│   │       ├── sectionphase2.html
-│   │       └── sectionphase3.html
-│   ├── routes/
-│   │   ├── phase3.py
-│   │   └── ...
-│   └── cv_processor/
-│       └── core.py
-├── uploads/           # File uploads
-├── outputs/           # Processed files
-├── run_local.py       # Local development runner
-├── run_local.bat      # Windows batch runner
-├── deploy_vm.sh       # VM deployment script
-├── deploy_production.py # Production deployment
-├── quick_start.py     # One-command setup
-└── requirements.txt   # Dependencies
+│   ├── __init__.py              # Flask app factory
+│   ├── cv_processor/            # CV processing modules
+│   ├── routes/                  # Route handlers
+│   │   ├── modules/             # Phase 1&2 processing logic
+│   │   ├── phase3/              # Phase 3 CV processing
+│   │   ├── home.py              # Main page route
+│   │   ├── login.py             # Authentication
+│   │   ├── upload_phase1.py     # Phase 1 endpoints
+│   │   └── upload_phase2.py     # Phase 2 endpoints
+│   ├── static/                  # Static assets
+│   └── templates/               # HTML templates
+├── uploads/                     # File upload directory
+├── outputs/                     # Generated file outputs
+├── .env.example                 # Environment template
+├── requirements.txt             # Python dependencies
+├── run_local.py                 # Development server
+└── test_ai.py                   # AI integration tests
 ```
 
-## Development
+## API Endpoints
 
-### Local Development
+### Phase 1 - Writing Plans
+- `POST /upload-phase1` - Process documents for writing plan generation
+
+### Phase 2 - Template Generation  
+- `POST /upload-phase2` - Generate templates from document analysis
+
+### Phase 3 - CV Processing
+- `POST /phase3/process` - Start CV batch processing
+- `GET /phase3/status/<session_id>` - Check processing status
+- `GET /phase3/download/<file_id>` - Download individual processed CV
+- `GET /phase3/download-all/<session_id>` - Download all processed CVs as ZIP
+
+## Environment Variables
+
+| Variable | Description | Required | Default |
+|----------|-------------|----------|---------|
+| `SECRET_KEY` | Flask secret key | Yes | - |
+| `JWT_SECRET_KEY` | JWT token secret | Yes | - |
+| `OPENAI_API_KEY` | OpenAI API key for Phase 1&2 | Yes | - |
+| `GEMINI_API_KEY` | Google Gemini API key for Phase 3 | Yes | - |
+| `FLASK_ENV` | Flask environment | No | `development` |
+| `PRODUCTION` | Production mode flag | No | `false` |
+| `HOST` | Server host | No | `0.0.0.0` |
+| `PORT` | Server port | No | `5000` |
+| `MAX_CONTENT_LENGTH` | Max upload size in bytes | No | `16777216` |
+
+## Testing
+
+Test AI integration:
 ```bash
-# Use the development runner with auto-reload
-python run_local.py
-
-# Or set environment variables manually
-export FLASK_ENV=development
-export FLASK_DEBUG=1
-python run.py
+python test_ai.py
 ```
 
-### Adding New Features
-1. Create feature branch
-2. Add routes in `app/routes/`
-3. Add templates in `app/templates/`
-4. Update requirements if needed
-5. Test locally with `python run_local.py`
+## File Formats Supported
 
-## Production Deployment Options
-
-### 1. VM Deployment (Recommended)
-```bash
-sudo ./deploy_vm.sh
-```
-- Automatic system setup
-- Nginx reverse proxy
-- Systemd service
-- SSL ready
-
-### 2. Docker Deployment
-```bash
-# Build image
-docker build -t bigpiai .
-
-# Run container
-docker run -p 80:5000 -e PRODUCTION=true bigpiai
-```
-
-### 3. Manual Server Setup
-```bash
-# Install dependencies
-pip install -r requirements.txt
-
-# Run with gunicorn
-gunicorn --worker-class eventlet -w 1 --bind 0.0.0.0:80 run:app
-```
+- **Input**: PDF, DOCX, TXT
+- **Output**: DOCX, PDF, XLSX (depending on phase)
+- **Templates**: DOCX with Jinja2 placeholders
 
 ## Troubleshooting
 
 ### Common Issues
 
-1. **Port 80 Permission Denied**
-   ```bash
-   # Use different port
-   PORT=8080 ./deploy_vm.sh
-   ```
-
-2. **Missing Dependencies**
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-3. **AI Processing Errors**
-   - Check `GEMINI_API_KEY` in `.env` file
-   - Verify API key is valid and has quota
-
-4. **File Upload Issues**
-   - Check upload directory permissions
-   - Verify file size limits in configuration
+1. **Missing API Keys**: Ensure all required API keys are set in `.env`
+2. **File Upload Errors**: Check `MAX_CONTENT_LENGTH` setting
+3. **Processing Failures**: Verify AI API quotas and connectivity
+4. **Windows COM Errors**: Some features require Windows environment for full functionality
 
 ### Logs
-- Development: Console output
-- Production: `logs/access.log` and `logs/error.log`
 
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test with `python run_local.py`
-5. Submit a pull request
+Check application logs in the `logs/` directory for detailed error information.
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is proprietary software. All rights reserved.
