@@ -192,7 +192,13 @@ def run_with_waitress(app, host, port):
 def run_with_gunicorn(host, port, workers):
     """Run the application with Gunicorn server."""
     try:
-        import gunicorn.app.wsgiapp as wsgi
+        import subprocess
+        import shutil
+        
+        # Check if gunicorn is available
+        if not shutil.which('gunicorn'):
+            print("❌ Gunicorn not found. Install with: pip install gunicorn")
+            return False
         
         print(f"🚀 Starting Gunicorn production server...")
         print(f"📍 Server will be available at: http://{host}:{port}")
@@ -201,25 +207,34 @@ def run_with_gunicorn(host, port, workers):
         print(f"⚠️  Press Ctrl+C to stop the server")
         print("=" * 50)
         
-        # Gunicorn configuration
-        sys.argv = [
+        # Gunicorn command
+        cmd = [
             'gunicorn',
             '--bind', f'{host}:{port}',
             '--workers', str(workers),
             '--worker-class', 'sync',
             '--timeout', '120',
-            '--keepalive', '5',
+            '--keep-alive', '5',
             '--max-requests', '1000',
             '--max-requests-jitter', '100',
             '--preload',
-            'app:create_app()'
+            '--access-logfile', '-',  # Log to stdout
+            '--error-logfile', '-',   # Log to stderr
+            'run:app'
         ]
         
-        wsgi.run()
+        # Run Gunicorn
+        subprocess.run(cmd, check=True)
         
-    except ImportError:
+    except subprocess.CalledProcessError as e:
+        print(f"❌ Gunicorn exited with error code: {e.returncode}")
+        return False
+    except FileNotFoundError:
         print("❌ Gunicorn not installed. Install with: pip install gunicorn")
         return False
+    except KeyboardInterrupt:
+        print("\n👋 Gunicorn server stopped by user")
+        return True
     except Exception as e:
         print(f"❌ Error starting Gunicorn server: {e}")
         return False

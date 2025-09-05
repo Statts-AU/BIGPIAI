@@ -19,7 +19,7 @@ def import_custom():
         format_non_toc_page_for_extraction
     )
     return (
-        client,
+        get_openai_client,
         format_content_for_toc_endpage_extraction,
         read_pdf,
         format_toc_page_for_extraction,
@@ -27,7 +27,7 @@ def import_custom():
     )
 
 
-client, \
+get_openai_client, \
     format_content_for_toc_endpage_extraction, \
     read_pdf, \
     format_toc_page_for_extraction, \

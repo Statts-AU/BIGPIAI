@@ -2,7 +2,7 @@
 """
 CV Processor - A modular CV processing and document generation system.
 """
-from cv_processor.core import *
+from app.cv_processor.core import *
 
 __version__ = "1.0.0"
 __author__ = "CV Processor Team"

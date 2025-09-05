@@ -7,13 +7,13 @@ import os
 from pathlib import Path
 
 try:
-    from cv_processor.editor.docxedit_editor import DocxEditEditor, DOCXEDIT_AVAILABLE
+    from app.cv_processor.editor.docxedit_editor import DocxEditEditor, DOCXEDIT_AVAILABLE
 except ImportError:
     DocxEditEditor = None
     DOCXEDIT_AVAILABLE = False
 
 try:
-    from cv_processor.editor.python_docx_editor import PythonDocxEditor, PYTHON_DOCX_AVAILABLE
+    from app.cv_processor.editor.python_docx_editor import PythonDocxEditor, PYTHON_DOCX_AVAILABLE
 except ImportError:
     PythonDocxEditor = None
     PYTHON_DOCX_AVAILABLE = False
